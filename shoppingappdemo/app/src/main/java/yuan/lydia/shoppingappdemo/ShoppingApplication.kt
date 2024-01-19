@@ -2,8 +2,8 @@ package yuan.lydia.shoppingappdemo
 
 
 import android.app.Application
-import yuan.lydia.shoppingappdemo.data.userAuth.AppContainer
-import yuan.lydia.shoppingappdemo.data.userAuth.DefaultAppContainer
+import yuan.lydia.shoppingappdemo.data.utils.AppContainer
+import yuan.lydia.shoppingappdemo.data.utils.DefaultAppContainer
 
 
 class ShoppingApplication: Application() {

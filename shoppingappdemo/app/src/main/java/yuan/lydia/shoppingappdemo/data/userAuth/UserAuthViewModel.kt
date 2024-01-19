@@ -1,5 +1,6 @@
 package yuan.lydia.shoppingappdemo.data.userAuth
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,33 +13,75 @@ import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.ShoppingApplication
 import yuan.lydia.shoppingappdemo.network.userAuth.LoginRequest
 import yuan.lydia.shoppingappdemo.network.userAuth.LoginResponse
+import yuan.lydia.shoppingappdemo.network.userAuth.RegisterRequest
+import yuan.lydia.shoppingappdemo.network.userAuth.RegisterResponse
 import yuan.lydia.shoppingappdemo.network.userAuth.UserAuthRepository
 
-sealed interface UiState {
-    data class LoginSuccess(val artwork: LoginResponse) : UiState
-    object Error : UiState
-    object Loading : UiState
+// TODO: handle error notification and UI state change
+// TODO: store token in shared preference
 
-    object Uninitialized : UiState
-    object InvalidInput : UiState
+sealed interface UiState {
+    data class LoginSuccess(val response: LoginResponse) : UiState
+
+    data class LoginError(val response: LoginResponse) : UiState
+
+    data class LoginNetworkError(val message: String) : UiState
+
+    data class RegisterError(val response: RegisterResponse) : UiState
+
+    data class RegisterNetworkError(val message: String) : UiState
+
+    data object Uninitialized : UiState
+
+    data object Loading : UiState
 }
 
 class UserAuthViewModel(
     val userAuthRepository: UserAuthRepository
 ) : ViewModel() {
     var uiState: UiState by mutableStateOf(UiState.Uninitialized)
-        private set
+
+
+    private suspend fun loginHelper(loginRequest: LoginRequest): UiState {
+        return try {
+            val response = userAuthRepository.login(loginRequest)
+            if (response.status.success) {
+                Log.d("UserAuthViewModel", "login success: $response")
+                UiState.LoginSuccess(response)
+            } else {
+                Log.d("UserAuthViewModel", "login error: $response")
+                UiState.LoginError(response)
+            }
+        } catch (e: retrofit2.HttpException) {
+            Log.d("UserAuthViewModel", "login error: $e")
+            UiState.LoginNetworkError(e.message())
+        }
+    }
 
     fun login(username: String, password: String) {
         val loginRequest = LoginRequest(username, password)
         uiState = UiState.Loading
-        // Create a new ViewModel scope to asynchronously fetch data
         viewModelScope.launch {
-            // Using a try/catch to handle possible Exception when updating state
+            uiState = loginHelper(loginRequest)
+        }
+    }
+
+    fun register(username: String, email: String, password: String) {
+        val registerRequest = RegisterRequest(username, email, password)
+        uiState = UiState.Loading
+        viewModelScope.launch {
             uiState = try {
-                UiState.LoginSuccess(userAuthRepository.login(loginRequest))
+                val response = userAuthRepository.register(registerRequest)
+                if (response.success) {
+                    Log.d("UserAuthViewModel", "register success: $response")
+                    loginHelper(LoginRequest(username, password))
+                } else {
+                    Log.d("UserAuthViewModel", "register error: $response")
+                    UiState.RegisterError(response)
+                }
             } catch (e: retrofit2.HttpException) {
-                UiState.Error
+                Log.d("UserAuthViewModel", "register error: $e")
+                UiState.RegisterNetworkError(e.message())
             }
         }
     }

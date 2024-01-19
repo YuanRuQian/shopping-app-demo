@@ -19,27 +19,36 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.KeyboardType.Companion.Password
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import yuan.lydia.shoppingappdemo.data.userAuth.UiState
 import yuan.lydia.shoppingappdemo.data.userAuth.UserAuthViewModel
+import yuan.lydia.shoppingappdemo.data.utils.SnackbarViewModel
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit, navigateToRegister: () -> Unit) {
+    val snackbarViewModel: SnackbarViewModel = viewModel(factory = SnackbarViewModel.Factory)
     val userAuthViewModel: UserAuthViewModel = viewModel(factory = UserAuthViewModel.Factory)
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isLoginButtonEnabled by remember { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     fun updateLoginButtonState() {
         isLoginButtonEnabled = username.isNotBlank() && password.isNotBlank()
@@ -66,7 +75,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit, navigateToRegister: () -> Unit) {
                     imageVector = Icons.Default.Person,
                     contentDescription = null
                 )
-            }
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
         )
 
         Spacer(modifier = Modifier.padding(16.dp))
@@ -78,7 +88,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, navigateToRegister: () -> Unit) {
                 updateLoginButtonState()
             },
             singleLine = true,
-            label = { Text("Enter password") },
+            label = { Text("Password") },
             visualTransformation =
             if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = Password),
@@ -92,7 +102,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit, navigateToRegister: () -> Unit) {
                 IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                     val visibilityIcon =
                         if (isPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
-                    // Please provide localized description for accessibility services
                     val description = if (isPasswordVisible) "Hide password" else "Show password"
                     Icon(imageVector = visibilityIcon, contentDescription = description)
                 }
@@ -104,8 +113,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, navigateToRegister: () -> Unit) {
         Button(
             onClick = {
                 userAuthViewModel.login(username, password)
-                Log.d("LoginScreen", "login success: $username, $password")
-                onLoginSuccess()
+                keyboardController?.hide()
             },
             enabled = isLoginButtonEnabled,
             modifier = Modifier
@@ -121,5 +129,50 @@ fun LoginScreen(onLoginSuccess: () -> Unit, navigateToRegister: () -> Unit) {
                 navigateToRegister()
             }
         )
+
+        when (val uiState = userAuthViewModel.uiState) {
+            is UiState.LoginSuccess -> {
+                onLoginSuccess()
+                LaunchedEffect(uiState.response.status.message) {
+                    snackbarViewModel.showSnackbar(uiState.response.status.message)
+                }
+                isLoginButtonEnabled = true
+            }
+
+            is UiState.LoginError -> {
+                LaunchedEffect(uiState.response.status.message) {
+                    snackbarViewModel.showSnackbar(uiState.response.status.message)
+                }
+                isLoginButtonEnabled = true
+            }
+
+            UiState.Loading -> {
+                isLoginButtonEnabled = false
+            }
+
+            UiState.Uninitialized -> {
+            }
+
+            is UiState.RegisterError -> {
+                LaunchedEffect(uiState.response.message) {
+                    snackbarViewModel.showSnackbar(uiState.response.message)
+                }
+                isLoginButtonEnabled = true
+            }
+
+            is UiState.RegisterNetworkError -> {
+                LaunchedEffect(uiState.message) {
+                    snackbarViewModel.showSnackbar(uiState.message)
+                }
+                isLoginButtonEnabled = true
+            }
+
+            is UiState.LoginNetworkError -> {
+                LaunchedEffect(uiState.message) {
+                    snackbarViewModel.showSnackbar(uiState.message)
+                }
+                isLoginButtonEnabled = true
+            }
+        }
     }
 }

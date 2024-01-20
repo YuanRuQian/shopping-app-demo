@@ -27,4 +27,12 @@ class SnackbarViewModel : ViewModel() {
             _snackbarMessage.emit(null)
         }
     }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                SnackbarViewModel()
+            }
+        }
+    }
 }

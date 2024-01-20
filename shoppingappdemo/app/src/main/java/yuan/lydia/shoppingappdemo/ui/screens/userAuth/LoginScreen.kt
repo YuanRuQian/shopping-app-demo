@@ -42,7 +42,11 @@ import yuan.lydia.shoppingappdemo.data.utils.TokenManager
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit, navigateToRegister: () -> Unit, showSnackBarMessage: (String) -> Unit) {
+fun LoginScreen(
+    onLoginSuccess: () -> Unit,
+    navigateToRegister: () -> Unit,
+    showSnackBarMessage: (String) -> Unit
+) {
     val userAuthViewModel: UserAuthViewModel = viewModel(factory = UserAuthViewModel.Factory)
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }

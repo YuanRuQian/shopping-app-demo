@@ -23,6 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
+import yuan.lydia.shoppingappdemo.data.shopping.ShoppingViewModel
 import yuan.lydia.shoppingappdemo.data.utils.SnackbarViewModel
 import yuan.lydia.shoppingappdemo.data.utils.TokenManager
 import yuan.lydia.shoppingappdemo.ui.screens.shopping.ProductsScreen
@@ -31,8 +32,9 @@ import yuan.lydia.shoppingappdemo.ui.screens.userAuth.RegisterScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppCanvas() {
-    val snackbarViewModel: SnackbarViewModel = viewModel()
+fun AppCanvas(
+    snackbarViewModel: SnackbarViewModel = viewModel(factory = SnackbarViewModel.Factory)
+) {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -82,8 +84,8 @@ fun AppCanvas() {
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         }
-    ) {
-        Log.d("AppCanvas", "AppCanvas: padding: $it")
+    ) { paddingValues ->
+        Log.d("AppCanvas", "AppCanvas: padding: $paddingValues")
         NavHost(
             navController = navController, startDestination = determineStartDestination(
                 LocalContext.current

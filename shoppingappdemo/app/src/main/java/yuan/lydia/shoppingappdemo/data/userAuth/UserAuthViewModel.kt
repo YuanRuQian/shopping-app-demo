@@ -1,6 +1,5 @@
 package yuan.lydia.shoppingappdemo.data.userAuth
 
-import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,15 +11,11 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.ShoppingApplication
-import yuan.lydia.shoppingappdemo.data.utils.TokenManager
 import yuan.lydia.shoppingappdemo.network.userAuth.LoginRequest
 import yuan.lydia.shoppingappdemo.network.userAuth.LoginResponse
 import yuan.lydia.shoppingappdemo.network.userAuth.RegisterRequest
 import yuan.lydia.shoppingappdemo.network.userAuth.RegisterResponse
 import yuan.lydia.shoppingappdemo.network.userAuth.UserAuthRepository
-
-// TODO: handle error notification and UI state change
-// TODO: store token in shared preference
 
 sealed interface UiState {
     data class LoginSuccess(val response: LoginResponse) : UiState
@@ -94,9 +89,7 @@ class UserAuthViewModel(
             initializer {
                 val application =
                     (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as ShoppingApplication)
-                val artworkRepository = application.container.userAuthRepository
-                Log.d("UserAuthViewModel", "initializer")
-                UserAuthViewModel(userAuthRepository = artworkRepository)
+                UserAuthViewModel(application.container.userAuthRepository)
             }
         }
     }

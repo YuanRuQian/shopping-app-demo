@@ -2,6 +2,10 @@ package yuan.lydia.shoppingappdemo.ui.screens
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,6 +22,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -96,45 +102,53 @@ fun AppCanvas(
             SnackbarHost(hostState = snackbarHostState)
         }
     ) { paddingValues ->
-        Log.d("AppCanvas", "AppCanvas: padding: $paddingValues")
-        NavHost(
-            navController = navController,
-            startDestination = if (isUserLoggedIn) AppRoute.Products.route else AppRoute.Login.route,
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            composable(AppRoute.Login.route) {
-                LoginScreen(
-                    onLoginSuccess = {
-                        setIsUserLoggedIn(true)
-                        navController.navigate(AppRoute.Products.route) {
-                            popUpTo(AppRoute.Login.route) { inclusive = true }
+            NavHost(
+                navController = navController,
+                startDestination = if (isUserLoggedIn) AppRoute.Products.route else AppRoute.Login.route,
+            ) {
+                composable(AppRoute.Login.route) {
+                    LoginScreen(
+                        onLoginSuccess = {
+                            setIsUserLoggedIn(true)
+                            navController.navigate(AppRoute.Products.route) {
+                                popUpTo(AppRoute.Login.route) { inclusive = true }
+                            }
+                        },
+                        navigateToRegister = {
+                            navController.navigate(AppRoute.Register.route)
+                        },
+                        showSnackBarMessage = { message ->
+                            snackbarViewModel.showSnackbar(message)
                         }
-                    },
-                    navigateToRegister = {
-                        navController.navigate(AppRoute.Register.route)
-                    },
-                    showSnackBarMessage = { message ->
-                        snackbarViewModel.showSnackbar(message)
-                    }
-                )
-            }
-            composable(AppRoute.Register.route) {
-                RegisterScreen(
-                    onLoginSuccess = {
-                        setIsUserLoggedIn(true)
-                        navController.navigate(AppRoute.Products.route) {
-                            popUpTo(AppRoute.Register.route) { inclusive = true }
+                    )
+                }
+                composable(AppRoute.Register.route) {
+                    RegisterScreen(
+                        onLoginSuccess = {
+                            setIsUserLoggedIn(true)
+                            navController.navigate(AppRoute.Products.route) {
+                                popUpTo(AppRoute.Register.route) { inclusive = true }
+                            }
+                        },
+                        navigateToLogin = {
+                            navController.navigate(AppRoute.Login.route)
+                        },
+                        showSnackBarMessage = { message ->
+                            snackbarViewModel.showSnackbar(message)
                         }
-                    },
-                    navigateToLogin = {
-                        navController.navigate(AppRoute.Login.route)
-                    },
-                    showSnackBarMessage = { message ->
-                        snackbarViewModel.showSnackbar(message)
-                    }
-                )
-            }
-            composable(AppRoute.Products.route) {
-                ProductsScreen()
+                    )
+                }
+                composable(AppRoute.Products.route) {
+                    ProductsScreen()
+                }
             }
         }
     }

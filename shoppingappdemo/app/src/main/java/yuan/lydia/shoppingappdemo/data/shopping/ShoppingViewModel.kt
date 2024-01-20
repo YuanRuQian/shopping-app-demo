@@ -1,8 +1,12 @@
 package yuan.lydia.shoppingappdemo.data.shopping
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -10,6 +14,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.ShoppingApplication
+import yuan.lydia.shoppingappdemo.network.shopping.Product
 import yuan.lydia.shoppingappdemo.network.shopping.ProductsResponse
 import yuan.lydia.shoppingappdemo.network.shopping.ShoppingRepository
 
@@ -31,10 +36,16 @@ class ShoppingViewModel(
 ) : ViewModel() {
     var uiState: UiState by mutableStateOf(UiState.Uninitialized)
 
+
+    private val _products = MutableLiveData<List<Product>>()
+    val products: LiveData<List<Product>>
+        get() = _products
+
     private suspend fun getProductsHelper(token: String): UiState {
         return try {
             val response = shoppingRepository.getProducts(token)
             if (response.status.success) {
+                _products.value = response.products
                 UiState.ProductsSuccess(response)
             } else {
                 UiState.ProductError(response)

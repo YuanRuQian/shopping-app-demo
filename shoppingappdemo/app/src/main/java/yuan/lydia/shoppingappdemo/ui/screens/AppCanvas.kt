@@ -3,10 +3,10 @@ package yuan.lydia.shoppingappdemo.ui.screens
 import android.content.Context
 import android.util.Log
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -16,6 +16,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -23,12 +24,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
-import yuan.lydia.shoppingappdemo.data.shopping.ShoppingViewModel
 import yuan.lydia.shoppingappdemo.data.utils.SnackbarViewModel
 import yuan.lydia.shoppingappdemo.data.utils.TokenManager
 import yuan.lydia.shoppingappdemo.ui.screens.shopping.ProductsScreen
 import yuan.lydia.shoppingappdemo.ui.screens.userAuth.LoginScreen
 import yuan.lydia.shoppingappdemo.ui.screens.userAuth.RegisterScreen
+
+sealed class AppRoute(val route: String) {
+    data object Login : AppRoute("login")
+    data object Register : AppRoute("register")
+    data object Products : AppRoute("products")
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +44,11 @@ fun AppCanvas(
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val (isUserLoggedIn, setIsUserLoggedIn) = remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = true) {
+        setIsUserLoggedIn(TokenManager.getInstance(context).isTokenExist())
+    }
 
     // Observe changes in the snackbarMessage using LaunchedEffect
     LaunchedEffect(snackbarViewModel) {
@@ -61,25 +72,25 @@ fun AppCanvas(
                 ),
                 title = {
                     Text("Shopping App Demo by Lydia Yuan")
-                }
-            )
-        },
-        // TODO: remove this FAB, just for temporary testing to clear token & log out
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    TokenManager.getInstance(context).clearToken()
-                    navController.navigate("login") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
+                },
+                actions = {
+                    if (isUserLoggedIn) {
+                        IconButton(onClick = {
+                            logout(
+                                context,
+                                navController,
+                                snackbarViewModel,
+                                setIsUserLoggedIn
+                            )
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.ExitToApp,
+                                contentDescription = "Log out and exit the app"
+                            )
                         }
-                        launchSingleTop = true
                     }
-                    snackbarViewModel.showSnackbar("Clear Token!")
-                }
-            ) {
-                Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear Token")
-            }
+                },
+            )
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -87,51 +98,61 @@ fun AppCanvas(
     ) { paddingValues ->
         Log.d("AppCanvas", "AppCanvas: padding: $paddingValues")
         NavHost(
-            navController = navController, startDestination = determineStartDestination(
-                LocalContext.current
-            )
+            navController = navController,
+            startDestination = if (isUserLoggedIn) AppRoute.Products.route else AppRoute.Login.route,
         ) {
-            composable("login") {
+            composable(AppRoute.Login.route) {
                 LoginScreen(
                     onLoginSuccess = {
-                        navController.navigate("products") {
-                            popUpTo("login") { inclusive = true }
+                        setIsUserLoggedIn(true)
+                        navController.navigate(AppRoute.Products.route) {
+                            popUpTo(AppRoute.Login.route) { inclusive = true }
                         }
                     },
                     navigateToRegister = {
-                        navController.navigate("register")
+                        navController.navigate(AppRoute.Register.route)
                     },
                     showSnackBarMessage = { message ->
                         snackbarViewModel.showSnackbar(message)
                     }
                 )
             }
-            composable("register") {
+            composable(AppRoute.Register.route) {
                 RegisterScreen(
                     onLoginSuccess = {
-                        navController.navigate("products") {
-                            popUpTo("register") { inclusive = true }
+                        setIsUserLoggedIn(true)
+                        navController.navigate(AppRoute.Products.route) {
+                            popUpTo(AppRoute.Register.route) { inclusive = true }
                         }
                     },
                     navigateToLogin = {
-                        navController.navigate("login")
+                        navController.navigate(AppRoute.Login.route)
                     },
                     showSnackBarMessage = { message ->
                         snackbarViewModel.showSnackbar(message)
                     }
                 )
             }
-            composable("products") {
+            composable(AppRoute.Products.route) {
                 ProductsScreen()
             }
         }
     }
 }
 
-fun determineStartDestination(context: Context): String {
-    return if (TokenManager.getInstance(context).isTokenExist()) {
-        "products"
-    } else {
-        "login"
+fun logout(
+    context: Context,
+    navController: androidx.navigation.NavController,
+    snackbarViewModel: SnackbarViewModel,
+    setIsUserLoggedIn: (Boolean) -> Unit
+) {
+    TokenManager.getInstance(context).clearToken()
+    setIsUserLoggedIn(false)
+    navController.navigate(AppRoute.Login.route) {
+        popUpTo(navController.graph.startDestinationId) {
+            inclusive = true
+        }
+        launchSingleTop = true
     }
+    snackbarViewModel.showSnackbar("See you next time!")
 }

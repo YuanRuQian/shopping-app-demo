@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-// TODO: make snack bar work
 class SnackbarViewModel : ViewModel() {
 
     private val _snackbarMessage = MutableStateFlow<String?>(null)

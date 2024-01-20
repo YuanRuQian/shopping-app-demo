@@ -40,7 +40,7 @@ import yuan.lydia.shoppingappdemo.data.utils.TokenManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
 
 @Composable
-fun ProductsScreen(shoppingViewModel: ShoppingViewModel = viewModel(factory = ShoppingViewModel.Factory)) {
+fun ShoppingScreen(shoppingViewModel: ShoppingViewModel = viewModel(factory = ShoppingViewModel.Factory)) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -98,11 +98,12 @@ fun ProductItem(product: Product) {
                         .weight(1f) // Fluid left column
                         .padding(16.dp)
                 ) {
-                    Text(text = product.name, fontWeight = FontWeight.Bold)
+                    Text(text = product.name, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.bodyLarge.fontSize)
                     Text(
                         text = product.description,
                         modifier = Modifier.padding(top = 4.dp),
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontSize = MaterialTheme.typography.bodySmall.fontSize
                     )
                     // TODO: use localized price
                     Text(

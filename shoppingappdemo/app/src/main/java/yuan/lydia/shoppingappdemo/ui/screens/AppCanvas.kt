@@ -4,10 +4,17 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingBasket
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,26 +27,39 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.data.utils.SnackbarViewModel
 import yuan.lydia.shoppingappdemo.data.utils.TokenManager
-import yuan.lydia.shoppingappdemo.ui.screens.shopping.ProductsScreen
+import yuan.lydia.shoppingappdemo.ui.screens.cart.CartScreen
+import yuan.lydia.shoppingappdemo.ui.screens.history.HistoryScreen
+import yuan.lydia.shoppingappdemo.ui.screens.shopping.ShoppingScreen
 import yuan.lydia.shoppingappdemo.ui.screens.userAuth.LoginScreen
 import yuan.lydia.shoppingappdemo.ui.screens.userAuth.RegisterScreen
+import yuan.lydia.shoppingappdemo.ui.screens.whishlist.WishlistScreen
 
 sealed class AppRoute(val route: String) {
-    data object Login : AppRoute("login")
-    data object Register : AppRoute("register")
-    data object Products : AppRoute("products")
+    data object Login : AppRoute("Login")
+    data object Register : AppRoute("Register")
+    data object Shopping : AppRoute("Shopping")
+
+    data object Cart : AppRoute("Cart")
+    data object History : AppRoute("History")
+    data object Wishlist : AppRoute("Wishlist")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,23 +100,20 @@ fun AppCanvas(
                     Text("Shopping App Demo by Lydia Yuan")
                 },
                 actions = {
-                    if (isUserLoggedIn) {
-                        IconButton(onClick = {
-                            logout(
-                                context,
-                                navController,
-                                snackbarViewModel,
-                                setIsUserLoggedIn
-                            )
-                        }) {
-                            Icon(
-                                imageVector = Icons.Filled.ExitToApp,
-                                contentDescription = "Log out and exit the app"
-                            )
-                        }
-                    }
+                    ExitButton(
+                        isUserLoggedIn,
+                        context,
+                        navController,
+                        snackbarViewModel,
+                        setIsUserLoggedIn
+                    )
                 },
             )
+        },
+        bottomBar = {
+            if (isUserLoggedIn) {
+                BottomNavigationBar(navController)
+            }
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -112,13 +129,13 @@ fun AppCanvas(
         ) {
             NavHost(
                 navController = navController,
-                startDestination = if (isUserLoggedIn) AppRoute.Products.route else AppRoute.Login.route,
+                startDestination = if (isUserLoggedIn) AppRoute.Shopping.route else AppRoute.Login.route,
             ) {
                 composable(AppRoute.Login.route) {
                     LoginScreen(
                         onLoginSuccess = {
                             setIsUserLoggedIn(true)
-                            navController.navigate(AppRoute.Products.route) {
+                            navController.navigate(AppRoute.Shopping.route) {
                                 popUpTo(AppRoute.Login.route) { inclusive = true }
                             }
                         },
@@ -134,7 +151,7 @@ fun AppCanvas(
                     RegisterScreen(
                         onLoginSuccess = {
                             setIsUserLoggedIn(true)
-                            navController.navigate(AppRoute.Products.route) {
+                            navController.navigate(AppRoute.Shopping.route) {
                                 popUpTo(AppRoute.Register.route) { inclusive = true }
                             }
                         },
@@ -146,8 +163,20 @@ fun AppCanvas(
                         }
                     )
                 }
-                composable(AppRoute.Products.route) {
-                    ProductsScreen()
+                composable(AppRoute.Shopping.route) {
+                    ShoppingScreen()
+                }
+
+                composable(AppRoute.Cart.route) {
+                    CartScreen()
+                }
+
+                composable(AppRoute.History.route) {
+                    HistoryScreen()
+                }
+
+                composable(AppRoute.Wishlist.route) {
+                    WishlistScreen()
                 }
             }
         }
@@ -156,7 +185,7 @@ fun AppCanvas(
 
 fun logout(
     context: Context,
-    navController: androidx.navigation.NavController,
+    navController: NavController,
     snackbarViewModel: SnackbarViewModel,
     setIsUserLoggedIn: (Boolean) -> Unit
 ) {
@@ -169,4 +198,116 @@ fun logout(
         launchSingleTop = true
     }
     snackbarViewModel.showSnackbar("See you next time!")
+}
+
+// TODO: add onClick event
+@Composable
+fun BottomNavigationBarButton(icon: ImageVector, text: String, onClick: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        IconButton(onClick = { onClick() }) {
+            Icon(
+                icon,
+                contentDescription = text
+            )
+        }
+        Text(text)
+    }
+}
+
+fun navigationWithDestinationPreCheck(
+    navController: NavController,
+    destination: String,
+    navBackStackEntry: NavBackStackEntry?
+) {
+    if (navBackStackEntry?.destination?.route != destination) {
+        navController.navigate(destination)
+    }
+}
+
+@Composable
+fun BottomNavigationBar(navController: NavController) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+    BottomAppBar {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            BottomNavigationBarButton(
+                icon = Icons.Filled.Search,
+                text = AppRoute.Shopping.route,
+                onClick = {
+                    navigationWithDestinationPreCheck(
+                        navController,
+                        AppRoute.Shopping.route,
+                        navBackStackEntry
+                    )
+                }
+            )
+            BottomNavigationBarButton(
+                icon = Icons.Filled.ShoppingBasket,
+                text = AppRoute.Cart.route,
+                onClick = {
+                    navigationWithDestinationPreCheck(
+                        navController,
+                        AppRoute.Cart.route,
+                        navBackStackEntry
+                    )
+                }
+            )
+            BottomNavigationBarButton(
+                icon = Icons.Filled.History,
+                text = AppRoute.History.route,
+                onClick = {
+                    navigationWithDestinationPreCheck(
+                        navController,
+                        AppRoute.History.route,
+                        navBackStackEntry
+                    )
+                }
+            )
+            BottomNavigationBarButton(
+                icon = Icons.Filled.Favorite,
+                text = AppRoute.Wishlist.route,
+                onClick = {
+                    navigationWithDestinationPreCheck(
+                        navController,
+                        AppRoute.Wishlist.route,
+                        navBackStackEntry
+                    )
+                }
+            )
+        }
+    }
+}
+
+
+@Composable
+fun ExitButton(
+    isUserLoggedIn: Boolean,
+    context: Context,
+    navController: NavController,
+    snackbarViewModel: SnackbarViewModel,
+    setIsUserLoggedIn: (Boolean) -> Unit
+) {
+    if (isUserLoggedIn) {
+        IconButton(onClick = {
+            logout(
+                context,
+                navController,
+                snackbarViewModel,
+                setIsUserLoggedIn
+            )
+        }) {
+            Icon(
+                imageVector = Icons.Filled.ExitToApp,
+                contentDescription = "Log out and exit the app"
+            )
+        }
+    }
 }

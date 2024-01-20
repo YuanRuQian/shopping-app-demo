@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import yuan.lydia.shoppingappdemo.ui.screens.AppCanvas
 import yuan.lydia.shoppingappdemo.ui.theme.ShoppingappdemoTheme
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -5,6 +5,9 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import yuan.lydia.shoppingappdemo.network.history.HistoryApiServices
+import yuan.lydia.shoppingappdemo.network.history.HistoryRepository
+import yuan.lydia.shoppingappdemo.network.history.NetworkHistoryRepository
 import yuan.lydia.shoppingappdemo.network.shopping.NetworkShoppingRepository
 import yuan.lydia.shoppingappdemo.network.shopping.ShoppingApiServices
 import yuan.lydia.shoppingappdemo.network.shopping.ShoppingRepository
@@ -17,6 +20,7 @@ import yuan.lydia.shoppingappdemo.network.userAuth.UserAuthRepository
 interface AppContainer {
     val userAuthRepository: UserAuthRepository
     val shoppingRepository: ShoppingRepository
+    val historyRepository: HistoryRepository
 }
 
 class DefaultAppContainer : AppContainer {
@@ -26,6 +30,9 @@ class DefaultAppContainer : AppContainer {
 
     override val shoppingRepository: ShoppingRepository by lazy {
         NetworkShoppingRepository(shoppingService)
+    }
+    override val historyRepository: HistoryRepository by lazy {
+        NetworkHistoryRepository(historyService)
     }
 
 
@@ -53,5 +60,9 @@ class DefaultAppContainer : AppContainer {
 
     private val shoppingService by lazy {
         serviceBase.create(ShoppingApiServices::class.java)
+    }
+
+    private val historyService by lazy {
+        serviceBase.create(HistoryApiServices::class.java)
     }
 }

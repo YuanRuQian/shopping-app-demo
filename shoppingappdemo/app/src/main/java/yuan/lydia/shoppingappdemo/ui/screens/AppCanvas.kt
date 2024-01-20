@@ -1,7 +1,12 @@
 package yuan.lydia.shoppingappdemo.ui.screens
 
+import android.content.Context
 import android.util.Log
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -12,12 +17,14 @@ import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.data.utils.SnackbarViewModel
+import yuan.lydia.shoppingappdemo.data.utils.TokenManager
 import yuan.lydia.shoppingappdemo.ui.screens.shopping.ProductsScreen
 import yuan.lydia.shoppingappdemo.ui.screens.userAuth.LoginScreen
 import yuan.lydia.shoppingappdemo.ui.screens.userAuth.RegisterScreen
@@ -28,6 +35,7 @@ fun AppCanvas() {
     val snackbarViewModel: SnackbarViewModel = viewModel()
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     // Observe changes in the snackbarMessage using LaunchedEffect
     LaunchedEffect(snackbarViewModel) {
@@ -42,7 +50,6 @@ fun AppCanvas() {
         }
     }
 
-    // TODO: make snack bar work
     Scaffold(
         topBar = {
             TopAppBar(
@@ -55,12 +62,33 @@ fun AppCanvas() {
                 }
             )
         },
+        // TODO: remove this FAB, just for temporary testing to clear token & log out
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    TokenManager.getInstance(context).clearToken()
+                    navController.navigate("login") {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                    snackbarViewModel.showSnackbar("Clear Token!")
+                }
+            ) {
+                Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear Token")
+            }
+        },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         }
     ) {
         Log.d("AppCanvas", "AppCanvas: padding: $it")
-        NavHost(navController = navController, startDestination = "login") {
+        NavHost(
+            navController = navController, startDestination = determineStartDestination(
+                LocalContext.current
+            )
+        ) {
             composable("login") {
                 LoginScreen(
                     onLoginSuccess = {
@@ -95,5 +123,13 @@ fun AppCanvas() {
                 ProductsScreen()
             }
         }
+    }
+}
+
+fun determineStartDestination(context: Context): String {
+    return if (TokenManager.getInstance(context).isTokenExist()) {
+        "products"
+    } else {
+        "login"
     }
 }

@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import yuan.lydia.shoppingappdemo.data.userAuth.UiState
 import yuan.lydia.shoppingappdemo.data.userAuth.UserAuthViewModel
+import yuan.lydia.shoppingappdemo.data.utils.TokenManager
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -47,6 +49,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, navigateToRegister: () -> Unit, show
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isLoginButtonEnabled by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
 
     fun updateLoginButtonState() {
         isLoginButtonEnabled = username.isNotBlank() && password.isNotBlank()
@@ -130,11 +133,12 @@ fun LoginScreen(onLoginSuccess: () -> Unit, navigateToRegister: () -> Unit, show
 
         when (val uiState = userAuthViewModel.uiState) {
             is UiState.LoginSuccess -> {
-                onLoginSuccess()
                 LaunchedEffect(uiState.response.status.message) {
+                    isLoginButtonEnabled = true
+                    onLoginSuccess()
+                    TokenManager.getInstance(context).saveToken(uiState.response.token)
                     showSnackBarMessage(uiState.response.status.message)
                 }
-                isLoginButtonEnabled = true
             }
 
             is UiState.LoginError -> {

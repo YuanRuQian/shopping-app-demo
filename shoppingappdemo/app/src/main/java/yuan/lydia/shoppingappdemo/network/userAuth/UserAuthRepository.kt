@@ -4,7 +4,6 @@ import yuan.lydia.shoppingappdemo.network.ApiServices
 
 interface UserAuthRepository {
     suspend fun login(loginRequest: LoginRequest): LoginResponse
-
     suspend fun register(registerRequest: RegisterRequest): RegisterResponse
 }
 

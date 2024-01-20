@@ -1,9 +1,14 @@
 package yuan.lydia.shoppingappdemo.ui.screens
 
 import android.util.Log
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -17,9 +22,10 @@ import yuan.lydia.shoppingappdemo.ui.screens.shopping.ProductsScreen
 import yuan.lydia.shoppingappdemo.ui.screens.userAuth.LoginScreen
 import yuan.lydia.shoppingappdemo.ui.screens.userAuth.RegisterScreen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppCanvas() {
-    val snackbarViewModel: SnackbarViewModel = viewModel(factory = SnackbarViewModel.Factory)
+    val snackbarViewModel: SnackbarViewModel = viewModel()
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -38,18 +44,20 @@ fun AppCanvas() {
 
     // TODO: make snack bar work
     Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
+                title = {
+                    Text("Shopping App Demo by Lydia Yuan")
+                }
+            )
+        },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         }
-//        floatingActionButton = {
-//            ExtendedFloatingActionButton(
-//                text = { Text("Show snackbar") },
-//                icon = { Icon(Icons.Filled.Image, contentDescription = "") },
-//                onClick = {
-//                    snackbarViewModel.showSnackbar("Hello from FAB")
-//                }
-//            )
-//  }
     ) {
         Log.d("AppCanvas", "AppCanvas: padding: $it")
         NavHost(navController = navController, startDestination = "login") {
@@ -62,6 +70,9 @@ fun AppCanvas() {
                     },
                     navigateToRegister = {
                         navController.navigate("register")
+                    },
+                    showSnackBarMessage = { message ->
+                        snackbarViewModel.showSnackbar(message)
                     }
                 )
             }
@@ -74,6 +85,9 @@ fun AppCanvas() {
                     },
                     navigateToLogin = {
                         navController.navigate("login")
+                    },
+                    showSnackBarMessage = { message ->
+                        snackbarViewModel.showSnackbar(message)
                     }
                 )
             }

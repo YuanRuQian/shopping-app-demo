@@ -37,12 +37,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import yuan.lydia.shoppingappdemo.data.userAuth.UiState
 import yuan.lydia.shoppingappdemo.data.userAuth.UserAuthViewModel
-import yuan.lydia.shoppingappdemo.data.utils.SnackbarViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit, navigateToRegister: () -> Unit) {
-    val snackbarViewModel: SnackbarViewModel = viewModel(factory = SnackbarViewModel.Factory)
+fun LoginScreen(onLoginSuccess: () -> Unit, navigateToRegister: () -> Unit, showSnackBarMessage: (String) -> Unit) {
     val userAuthViewModel: UserAuthViewModel = viewModel(factory = UserAuthViewModel.Factory)
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -134,14 +132,14 @@ fun LoginScreen(onLoginSuccess: () -> Unit, navigateToRegister: () -> Unit) {
             is UiState.LoginSuccess -> {
                 onLoginSuccess()
                 LaunchedEffect(uiState.response.status.message) {
-                    snackbarViewModel.showSnackbar(uiState.response.status.message)
+                    showSnackBarMessage(uiState.response.status.message)
                 }
                 isLoginButtonEnabled = true
             }
 
             is UiState.LoginError -> {
                 LaunchedEffect(uiState.response.status.message) {
-                    snackbarViewModel.showSnackbar(uiState.response.status.message)
+                    showSnackBarMessage(uiState.response.status.message)
                 }
                 isLoginButtonEnabled = true
             }
@@ -155,21 +153,21 @@ fun LoginScreen(onLoginSuccess: () -> Unit, navigateToRegister: () -> Unit) {
 
             is UiState.RegisterError -> {
                 LaunchedEffect(uiState.response.message) {
-                    snackbarViewModel.showSnackbar(uiState.response.message)
+                    showSnackBarMessage(uiState.response.message)
                 }
                 isLoginButtonEnabled = true
             }
 
             is UiState.RegisterNetworkError -> {
                 LaunchedEffect(uiState.message) {
-                    snackbarViewModel.showSnackbar(uiState.message)
+                    showSnackBarMessage(uiState.message)
                 }
                 isLoginButtonEnabled = true
             }
 
             is UiState.LoginNetworkError -> {
                 LaunchedEffect(uiState.message) {
-                    snackbarViewModel.showSnackbar(uiState.message)
+                    showSnackBarMessage(uiState.message)
                 }
                 isLoginButtonEnabled = true
             }

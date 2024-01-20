@@ -32,7 +32,6 @@ class DefaultAppContainer : AppContainer {
         .addInterceptor(logger)
         .build()
 
-    @OptIn(ExperimentalSerializationApi::class)
     private val retrofit = Retrofit.Builder()
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())

@@ -1,5 +1,6 @@
 package yuan.lydia.shoppingappdemo.data.utils
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -16,6 +17,7 @@ class SnackbarViewModel : ViewModel() {
 
     fun showSnackbar(message: String) {
         viewModelScope.launch {
+            Log.d("SnackbarViewModel", "showSnackbar: $message")
             _snackbarMessage.emit(message)
         }
     }
@@ -23,14 +25,6 @@ class SnackbarViewModel : ViewModel() {
     fun clearSnackbar() {
         viewModelScope.launch {
             _snackbarMessage.emit(null)
-        }
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-               SnackbarViewModel()
-            }
         }
     }
 }

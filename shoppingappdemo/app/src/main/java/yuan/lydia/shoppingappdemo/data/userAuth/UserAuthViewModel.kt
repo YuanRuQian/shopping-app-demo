@@ -36,6 +36,7 @@ sealed interface UiState {
     data object Loading : UiState
 }
 
+// TODO: retrofit login / register failure returns 403 (wrong password), throws error, cannot display the returned error message
 class UserAuthViewModel(
     val userAuthRepository: UserAuthRepository
 ) : ViewModel() {
@@ -53,8 +54,8 @@ class UserAuthViewModel(
                 UiState.LoginError(response)
             }
         } catch (e: retrofit2.HttpException) {
-            Log.d("UserAuthViewModel", "login error: $e")
-            UiState.LoginNetworkError(e.message())
+            Log.d("UserAuthViewModel", "login network error: $e")
+            UiState.LoginNetworkError("Login failed, please check your username and password, and try again.")
         }
     }
 
@@ -70,7 +71,7 @@ class UserAuthViewModel(
         val registerRequest = RegisterRequest(username, email, password)
         uiState = UiState.Loading
         viewModelScope.launch {
-            uiState = try {
+             uiState = try {
                 val response = userAuthRepository.register(registerRequest)
                 if (response.success) {
                     Log.d("UserAuthViewModel", "register success: $response")
@@ -80,8 +81,8 @@ class UserAuthViewModel(
                     UiState.RegisterError(response)
                 }
             } catch (e: retrofit2.HttpException) {
-                Log.d("UserAuthViewModel", "register error: $e")
-                UiState.RegisterNetworkError(e.message())
+                Log.d("UserAuthViewModel", "register network error: $e")
+                UiState.RegisterNetworkError("Register failed, please check your input and network connection, and try again. $e")
             }
         }
     }
@@ -92,6 +93,7 @@ class UserAuthViewModel(
                 val application =
                     (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as ShoppingApplication)
                 val artworkRepository = application.container.userAuthRepository
+                Log.d("UserAuthViewModel", "initializer")
                 UserAuthViewModel(userAuthRepository = artworkRepository)
             }
         }

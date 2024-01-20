@@ -35,14 +35,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import yuan.lydia.shoppingappdemo.data.utils.SnackbarViewModel
 import yuan.lydia.shoppingappdemo.data.userAuth.UiState
 import yuan.lydia.shoppingappdemo.data.userAuth.UserAuthViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun RegisterScreen(onLoginSuccess: () -> Unit, navigateToLogin: () -> Unit) {
-    val snackbarViewModel: SnackbarViewModel = viewModel(factory = SnackbarViewModel.Factory)
+fun RegisterScreen(onLoginSuccess: () -> Unit, navigateToLogin: () -> Unit, showSnackBarMessage: (String) -> Unit) {
     val userAuthViewModel: UserAuthViewModel = viewModel(factory = UserAuthViewModel.Factory)
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -160,14 +158,14 @@ fun RegisterScreen(onLoginSuccess: () -> Unit, navigateToLogin: () -> Unit) {
             is UiState.LoginSuccess -> {
                 onLoginSuccess()
                 LaunchedEffect(uiState.response.status.message) {
-                    snackbarViewModel.showSnackbar(uiState.response.status.message)
+                    showSnackBarMessage(uiState.response.status.message)
                 }
                 isRegisterButtonEnabled = true
             }
 
             is UiState.LoginError -> {
                 LaunchedEffect(uiState.response.status.message) {
-                    snackbarViewModel.showSnackbar(uiState.response.status.message)
+                    showSnackBarMessage(uiState.response.status.message)
                 }
                 isRegisterButtonEnabled = true
             }
@@ -181,21 +179,21 @@ fun RegisterScreen(onLoginSuccess: () -> Unit, navigateToLogin: () -> Unit) {
 
             is UiState.RegisterError -> {
                 LaunchedEffect(uiState.response.message) {
-                    snackbarViewModel.showSnackbar(uiState.response.message)
+                    showSnackBarMessage(uiState.response.message)
                 }
                 isRegisterButtonEnabled = true
             }
 
             is UiState.RegisterNetworkError -> {
                 LaunchedEffect(uiState.message) {
-                    snackbarViewModel.showSnackbar(uiState.message)
+                    showSnackBarMessage(uiState.message)
                 }
                 isRegisterButtonEnabled = true
             }
 
             is UiState.LoginNetworkError -> {
                 LaunchedEffect(uiState.message) {
-                    snackbarViewModel.showSnackbar(uiState.message)
+                    showSnackBarMessage(uiState.message)
                 }
                 isRegisterButtonEnabled = true
             }

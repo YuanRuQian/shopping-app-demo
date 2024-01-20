@@ -16,6 +16,7 @@ import yuan.lydia.shoppingappdemo.network.history.HistoryRepository
 import yuan.lydia.shoppingappdemo.network.history.Order
 import yuan.lydia.shoppingappdemo.network.history.OrderHistoryResponse
 
+// TODO: how to sort the order history
 sealed interface UiState {
 
     data class OrderHistorySuccess(val response: OrderHistoryResponse) : UiState

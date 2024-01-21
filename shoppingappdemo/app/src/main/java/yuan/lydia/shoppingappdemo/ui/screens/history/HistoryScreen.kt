@@ -36,7 +36,7 @@ import java.util.Locale
 fun HistoryScreen(
     orderHistoryLiveData: LiveData<List<Order>>,
     getOrderHistory: (String) -> Unit,
-    checkOutOrderDetails: (String) -> Unit
+    checkOutOrderDetails: (String) -> Unit,
 ) {
 
     val orderHistory by orderHistoryLiveData.observeAsState()

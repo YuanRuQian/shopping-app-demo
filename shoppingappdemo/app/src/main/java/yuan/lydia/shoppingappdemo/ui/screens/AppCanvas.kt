@@ -190,7 +190,17 @@ fun AppCanvas(
                         getProducts = {
                             shoppingViewModel.getProducts(it)
                         },
-                        productsLiveData = shoppingViewModel.filteredProducts
+                        productsLiveData = shoppingViewModel.filteredProducts,
+                        increaseQuantity = { username, productId, addedQuantity ->
+                            cartWishlistManagementViewModel.increaseQuantityThenReloadUserCartData(
+                                username,
+                                productId,
+                                addedQuantity
+                            )
+                        },
+                        showSnackbarMessage = { message ->
+                            snackbarViewModel.showSnackbar(message)
+                        }
                     )
                 }
 
@@ -199,7 +209,17 @@ fun AppCanvas(
                         loadUserCartData = { username ->
                             cartWishlistManagementViewModel.loadUserCartData(username)
                         },
-                        userCartData = cartWishlistManagementViewModel.userCartLiveData.value,
+                        userCartDataLiveData = cartWishlistManagementViewModel.userCartLiveData,
+                        updateQuantity = { username, productId, newQuantity ->
+                            cartWishlistManagementViewModel.updateQuantityThenReloadUserCartData(
+                                username,
+                                productId,
+                                newQuantity
+                            )
+                        },
+                        showSnackbarMessage = { message ->
+                            snackbarViewModel.showSnackbar(message)
+                        }
                     )
                 }
 

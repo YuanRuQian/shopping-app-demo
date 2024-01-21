@@ -13,24 +13,24 @@ import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.WishlistI
 @Dao
 interface WishlistItemDao {
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWishlistItem(wishlistItem: WishlistItemEntity)
     @Delete
     suspend fun removeWishlistItem(wishlistItem: WishlistItemEntity)
 
     @Query("SELECT * FROM wishlistItem WHERE username = :username AND productId = :productId")
-    suspend fun getWishlistItem(username: String, productId: String): WishlistItemEntity?
+    suspend fun getWishlistItem(username: String, productId: Long): WishlistItemEntity?
 
     @Query("SELECT * FROM wishlistItem WHERE username = :username")
     fun getUserWishlistItems(username: String): Flow<List<WishlistItemEntity>>
 
     @Transaction
-    suspend fun addProductToWishlist(username: String, productId: String) {
+    suspend fun addProductToWishlist(username: String, productId: Long) {
         insertWishlistItem(WishlistItemEntity(username, productId))
     }
 
     @Transaction
-    suspend fun removeProductFromWishlist(username: String, productId: String) {
+    suspend fun removeProductFromWishlist(username: String, productId: Long) {
         val wishlistItem = getWishlistItem(username, productId)
         if (wishlistItem != null) {
             removeWishlistItem(wishlistItem)

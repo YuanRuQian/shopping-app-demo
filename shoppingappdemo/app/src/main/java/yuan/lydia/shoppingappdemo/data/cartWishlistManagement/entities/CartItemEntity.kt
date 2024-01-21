@@ -8,6 +8,6 @@ import androidx.room.Entity
 )
 data class CartItemEntity(
     val username: String,
-    val productId: String,
+    val productId: Long,
     var quantity: Int
 )

@@ -58,7 +58,9 @@ import yuan.lydia.shoppingappdemo.network.shopping.Product
 fun ShoppingScreen(
     getFilteredProducts: (filterType: FilterType, maxPrice: Int?) -> Unit,
     getProducts: (String) -> Unit,
-    productsLiveData: LiveData<List<Product>>
+    productsLiveData: LiveData<List<Product>>,
+    increaseQuantity: (String, Long, Int) -> Unit,
+    showSnackbarMessage: (String) -> Unit
 ) {
     var maxPrice: Int? by remember { mutableStateOf(null) }
     var expanded by remember { mutableStateOf(false) }
@@ -166,18 +168,18 @@ fun ShoppingScreen(
             getProducts(token)
         }
 
-        ProductsList(products = products ?: emptyList())
+        ProductsList(products = products ?: emptyList(), increaseQuantity = increaseQuantity, showSnackbarMessage = showSnackbarMessage)
     }
 }
 
 @Composable
-fun ProductsList(products: List<Product>) {
+fun ProductsList(products: List<Product>, increaseQuantity: (String, Long, Int) -> Unit, showSnackbarMessage: (String) -> Unit) {
     if (products.isEmpty()) {
         Text(text = "No products found")
     }
     LazyColumn {
         items(products) { product ->
-            ProductItem(product = product)
+            ProductItem(product = product, increaseQuantity = increaseQuantity, showSnackbarMessage = showSnackbarMessage)
         }
     }
 }
@@ -195,9 +197,12 @@ enum class FilterType(val readableText: String) {
 // TODO: add quantity change event
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductItem(product: Product) {
+fun ProductItem(product: Product, increaseQuantity: (String, Long, Int) -> Unit, showSnackbarMessage: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     var selectedQuantity by remember { mutableIntStateOf(1) }
+
+    val context = LocalContext.current
+    val username = UserInfoManager.getInstance(context).getUsername()!!
 
     ElevatedCard(
         modifier = Modifier
@@ -307,9 +312,14 @@ fun ProductItem(product: Product) {
                 ) {
                     Button(
                         onClick = {
-                            // Add logic to add the product to the cart with the selected quantity
-                            // You can pass the product and quantity to a function to handle cart addition
-                            // TODO: handleAddToCart(product, selectedQuantity)
+                            increaseQuantity(
+                                username,
+                                product.id,
+                                selectedQuantity
+                            )
+                            showSnackbarMessage("Added $selectedQuantity ${product.name} to cart!")
+                            selectedQuantity = 1
+                            // TODO: update cart button state and dropdown menu state
                         },
                         modifier = Modifier
                             .padding(8.dp)

@@ -8,5 +8,5 @@ import androidx.room.Entity
 )
 data class WishlistItemEntity(
     val username: String,
-    val productId: String
+    val productId: Long
 )

@@ -26,6 +26,20 @@ class CartWishlistManagementViewModel(private val cartWishlistManagementReposito
         }
     }
 
+    fun updateQuantityThenReloadUserCartData(username: String, productId: Long, newQuantity: Int) {
+        viewModelScope.launch {
+            cartWishlistManagementRepository.updateQuantity(username, productId, newQuantity)
+            loadUserCartData(username)
+        }
+    }
+
+    fun increaseQuantityThenReloadUserCartData(username: String, productId: Long, addedQuantity: Int) {
+        viewModelScope.launch {
+            cartWishlistManagementRepository.increaseQuantity(username, productId, addedQuantity)
+            loadUserCartData(username)
+        }
+    }
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {

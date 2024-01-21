@@ -1,7 +1,9 @@
 package yuan.lydia.shoppingappdemo.ui.screens.cart
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,9 +28,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LiveData
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.CartItemEntity
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
@@ -79,13 +85,33 @@ fun UserCart(
     updateQuantity: (String, Long, Int) -> Unit,
     showSnackbarMessage: (String) -> Unit
 ) {
-    LazyColumn {
-        items(userCartData.size) { index ->
-            CartItem(
-                cartItem = userCartData[index],
-                updateQuantity = updateQuantity,
-                showSnackbarMessage = showSnackbarMessage
-            )
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn {
+            items(userCartData.size) { index ->
+                CartItem(
+                    cartItem = userCartData[index],
+                    updateQuantity = updateQuantity,
+                    showSnackbarMessage = showSnackbarMessage
+                )
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomEnd)
+                .background(Color.White),
+        ) {
+            // TODO: Implement total price
+            Text(text = "Total: ${userCartData.sumOf { it.quantity }} items", fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(16.dp))
+            Button(
+                onClick = {
+                    // TODO: Implement checkout
+                    showSnackbarMessage("Checkout not implemented")
+                },
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(text = "Checkout")
+            }
         }
     }
 }

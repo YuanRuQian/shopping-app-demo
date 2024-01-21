@@ -26,7 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
-import yuan.lydia.shoppingappdemo.data.utils.TokenManager
+import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.history.OrderDetail
 import yuan.lydia.shoppingappdemo.network.history.OrderItem
 
@@ -40,7 +40,7 @@ fun OrderDetailsScreen(getOrderDetail: (String) -> Unit, orderDetail: OrderDetai
         verticalArrangement = Arrangement.Top
     ) {
         val context = LocalContext.current
-        val token = TokenManager.getInstance(context).getToken()!!
+        val token = UserInfoManager.getInstance(context).getToken()!!
 
         LaunchedEffect(key1 = true) {
             getOrderDetail(token)

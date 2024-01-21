@@ -51,7 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import yuan.lydia.shoppingappdemo.data.shopping.ShoppingViewModel
-import yuan.lydia.shoppingappdemo.data.utils.TokenManager
+import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -156,7 +156,7 @@ fun ShoppingScreen(shoppingViewModel: ShoppingViewModel = viewModel(factory = Sh
 
 
         val context = LocalContext.current
-        val token = TokenManager.getInstance(context).getToken()!!
+        val token = UserInfoManager.getInstance(context).getToken()!!
         val products = shoppingViewModel.filteredProducts.observeAsState()
 
         LaunchedEffect(key1 = true) {

@@ -45,7 +45,7 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.data.history.HistoryViewModel
 import yuan.lydia.shoppingappdemo.data.utils.SnackbarViewModel
-import yuan.lydia.shoppingappdemo.data.utils.TokenManager
+import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.ui.screens.cart.CartScreen
 import yuan.lydia.shoppingappdemo.ui.screens.history.HistoryScreen
 import yuan.lydia.shoppingappdemo.ui.screens.history.OrderDetailsScreen
@@ -78,7 +78,7 @@ fun AppCanvas(
     val historyViewModel: HistoryViewModel = viewModel(factory = HistoryViewModel.Factory)
 
     LaunchedEffect(key1 = true) {
-        setIsUserLoggedIn(TokenManager.getInstance(context).isTokenExist())
+        setIsUserLoggedIn(UserInfoManager.getInstance(context).isTokenExist())
     }
 
     // Observe changes in the snackbarMessage using LaunchedEffect
@@ -102,7 +102,15 @@ fun AppCanvas(
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
-                    Text("Shopping App Demo by Lydia Yuan")
+                    if (!isUserLoggedIn) {
+                        Text("Shopping App Demo by Lydia Yuan")
+                    } else {
+                        Text(
+                            "Enjoy shopping, ${
+                                UserInfoManager.getInstance(context).getUsername()
+                            }!"
+                        )
+                    }
                 },
                 actions = {
                     ExitButton(
@@ -220,7 +228,10 @@ fun logout(
     snackbarViewModel: SnackbarViewModel,
     setIsUserLoggedIn: (Boolean) -> Unit
 ) {
-    TokenManager.getInstance(context).clearToken()
+    val userInfoManager = UserInfoManager.getInstance(context)
+    userInfoManager.clearToken()
+    val currentUsername = userInfoManager.getUsername()
+    userInfoManager.clearUsername()
     setIsUserLoggedIn(false)
     navController.navigate(AppRoute.Login.route) {
         popUpTo(navController.graph.startDestinationId) {
@@ -228,7 +239,7 @@ fun logout(
         }
         launchSingleTop = true
     }
-    snackbarViewModel.showSnackbar("See you next time!")
+    snackbarViewModel.showSnackbar("See you next time, $currentUsername!")
 }
 
 @Composable

@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import yuan.lydia.shoppingappdemo.data.userAuth.UiState
 import yuan.lydia.shoppingappdemo.data.userAuth.UserAuthViewModel
-import yuan.lydia.shoppingappdemo.data.utils.TokenManager
+import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -139,8 +139,10 @@ fun LoginScreen(
             is UiState.LoginSuccess -> {
                 LaunchedEffect(uiState.response.status.message) {
                     isLoginButtonEnabled = true
+                    val userInfoManager = UserInfoManager.getInstance(context)
+                    userInfoManager.saveToken(uiState.response.token)
+                    userInfoManager.saveUsername(username)
                     onLoginSuccess()
-                    TokenManager.getInstance(context).saveToken(uiState.response.token)
                     showSnackBarMessage(uiState.response.status.message)
                 }
             }

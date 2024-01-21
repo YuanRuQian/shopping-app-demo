@@ -23,7 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import yuan.lydia.shoppingappdemo.data.utils.TokenManager
+import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.history.Order
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -43,7 +43,7 @@ fun HistoryScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val context = LocalContext.current
-        val token = TokenManager.getInstance(context).getToken()!!
+        val token = UserInfoManager.getInstance(context).getToken()!!
 
         LaunchedEffect(key1 = true) {
             getOrderHistory(token)

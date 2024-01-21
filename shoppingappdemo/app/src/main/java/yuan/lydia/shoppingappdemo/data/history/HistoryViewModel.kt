@@ -28,6 +28,10 @@ class HistoryViewModel(
     val currentOrderDetails: LiveData<OrderDetail?>
         get() = _currentOrderDetails
 
+    fun clearCurrentOrderDetails() {
+        _currentOrderDetails.value = null
+    }
+
     private suspend fun getOrderHistoryHelper(token: String) {
         try {
             val response = historyRepository.getOrderHistory(token)

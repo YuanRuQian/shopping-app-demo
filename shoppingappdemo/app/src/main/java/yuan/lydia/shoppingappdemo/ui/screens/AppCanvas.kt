@@ -199,7 +199,10 @@ fun AppCanvas(
                             getOrderDetail = { token ->
                                 historyViewModel.getOrderDetails(token, orderId)
                             },
-                            orderDetail = historyViewModel.currentOrderDetails.value
+                            orderDetail = historyViewModel.currentOrderDetails.value,
+                            onBack = {
+                                historyViewModel.clearCurrentOrderDetails()
+                            }
                         )
                     } else {
                         snackbarViewModel.showSnackbar("No order id found")

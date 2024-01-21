@@ -206,6 +206,10 @@ fun AppCanvas(
 
                 composable(AppRoute.Cart.route) {
                     CartScreen(
+                        loadProductsData = { token ->
+                            shoppingViewModel.getProducts(token)
+                        },
+                        productsLiveData = shoppingViewModel.filteredProducts,
                         loadUserCartData = { username ->
                             cartWishlistManagementViewModel.loadUserCartData(username)
                         },

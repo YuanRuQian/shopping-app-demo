@@ -5,12 +5,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -20,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,35 +36,48 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LiveData
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.CartItemEntity
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
+import yuan.lydia.shoppingappdemo.network.shopping.Product
+
 
 @Composable
 fun CartScreen(
+    loadProductsData: (String) -> Unit,
+    productsLiveData: LiveData<List<Product>>,
     loadUserCartData: (String) -> Unit,
     userCartDataLiveData: LiveData<List<CartItemEntity>>,
     updateQuantity: (String, Long, Int) -> Unit,
     showSnackbarMessage: (String) -> Unit
 ) {
     val context = LocalContext.current
-    val username = UserInfoManager.getInstance(context).getUsername()
+    val userInfoManager = UserInfoManager.getInstance(context)
+    val username = userInfoManager.getUsername()
+    val token = userInfoManager.getToken()
     val userCartData by userCartDataLiveData.observeAsState()
+    val productsData by productsLiveData.observeAsState()
 
-    if (username == null) {
+    if (username == null || token == null) {
         Text(text = "Please login to view your cart")
         return
     }
 
     LaunchedEffect(key1 = true) {
+        loadProductsData(token)
         loadUserCartData(username)
     }
+
+    fun getProductDataByProductId(productId: Long): Product? {
+        return productsData?.find { it.id == productId }
+    }
+
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -74,7 +91,8 @@ fun CartScreen(
             updateQuantity = { username, productId, newQuantity ->
                 updateQuantity(username, productId, newQuantity)
             },
-            showSnackbarMessage = showSnackbarMessage
+            showSnackbarMessage = showSnackbarMessage,
+            getProductDataByProductId = ::getProductDataByProductId
         )
     }
 }
@@ -83,7 +101,8 @@ fun CartScreen(
 fun UserCart(
     userCartData: List<CartItemEntity>,
     updateQuantity: (String, Long, Int) -> Unit,
-    showSnackbarMessage: (String) -> Unit
+    showSnackbarMessage: (String) -> Unit,
+    getProductDataByProductId: (Long) -> Product?
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
@@ -91,7 +110,8 @@ fun UserCart(
                 CartItem(
                     cartItem = userCartData[index],
                     updateQuantity = updateQuantity,
-                    showSnackbarMessage = showSnackbarMessage
+                    showSnackbarMessage = showSnackbarMessage,
+                    getProductDataByProductId = getProductDataByProductId
                 )
             }
         }
@@ -100,9 +120,21 @@ fun UserCart(
                 .fillMaxWidth()
                 .align(Alignment.BottomEnd)
                 .background(Color.White),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             // TODO: Implement total price
-            Text(text = "Total: ${userCartData.sumOf { it.quantity }} items", fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(16.dp))
+            Text(
+                text = "Total: ${userCartData.sumOf { it.quantity }} items, $${
+                    userCartData.sumOf {
+                        it.quantity * (getProductDataByProductId(
+                            it.productId
+                        )?.retailPrice?.toInt() ?: 0)
+                    }
+                }",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(16.dp)
+            )
             Button(
                 onClick = {
                     // TODO: Implement checkout
@@ -113,6 +145,7 @@ fun UserCart(
                 Text(text = "Checkout")
             }
         }
+
     }
 }
 
@@ -121,9 +154,17 @@ fun CartItem(
     cartItem: CartItemEntity,
     updateQuantity: (String, Long, Int) -> Unit,
     showSnackbarMessage: (String) -> Unit,
+    getProductDataByProductId: (Long) -> Product?
 ) {
 
     Log.d("CartItem", "CartItem ${cartItem.productId} quantity: ${cartItem.quantity}}")
+
+    val productInfo = getProductDataByProductId(cartItem.productId)
+
+    if (productInfo == null) {
+        Text(text = "Oops, product ${cartItem.productId} not found")
+        return
+    }
 
     val context = LocalContext.current
     val username = UserInfoManager.getInstance(context).getUsername()!!
@@ -133,65 +174,117 @@ fun CartItem(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(
-                text = "Product ID: ${cartItem.productId}",
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-            )
-
-
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                Column(
+                    modifier = Modifier
+                        .weight(0.518f)
+                        .fillMaxWidth()
                 ) {
-                    IconButton(onClick = {
-                        // Decrease quantity
-                        val selectedQuantity = maxOf(cartItem.quantity - 1, 0)
-                        updateQuantity(username, cartItem.productId, selectedQuantity)
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Remove,
-                            contentDescription = "Decrease quantity"
-                        )
-                    }
-                    OutlinedTextField(
-                        readOnly = true,
-                        value = cartItem.quantity.toString(),
-                        onValueChange = {
-                        },
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.width(50.dp)
+                    Text(
+                        text = productInfo.name,
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
                     )
-                    IconButton(onClick = {
-                        updateQuantity(username, cartItem.productId, cartItem.quantity + 1)
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Increase quantity"
-                        )
+
+                    Text(
+                        text = "Retail Price: $${productInfo.retailPrice}",
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                    )
+
+                    Text(text = "Quantity: ", modifier = Modifier.padding(16.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            IconButton(onClick = {
+                                // Decrease quantity
+                                val selectedQuantity = maxOf(cartItem.quantity - 1, 0)
+                                updateQuantity(username, cartItem.productId, selectedQuantity)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Remove,
+                                    contentDescription = "Decrease quantity"
+                                )
+                            }
+                            OutlinedTextField(
+                                readOnly = true,
+                                value = cartItem.quantity.toString(),
+                                onValueChange = {
+                                },
+                                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.width(50.dp)
+                            )
+                            IconButton(onClick = {
+                                // Increase quantity
+                                updateQuantity(username, cartItem.productId, cartItem.quantity + 1)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Increase quantity"
+                                )
+                            }
+                        }
                     }
+
+                    Text(
+                        text = "Total: $${productInfo.retailPrice * cartItem.quantity}",
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                    )
                 }
 
-                IconButton(onClick = {
-                    // Remove item
-                    updateQuantity(username, cartItem.productId, 0)
-                    showSnackbarMessage("Product ${cartItem.productId} removed from the cart")
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Remove item from cart"
-                    )
+                Column(
+                    modifier = Modifier
+                        .weight(0.482f)
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            updateQuantity(username, cartItem.productId, cartItem.quantity + 1)
+                            showSnackbarMessage("Remove ${productInfo.name} from cart")
+                        },
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .height(IntrinsicSize.Min) // Optional: Ensure the button height is not too tall
+                            .background(
+                                MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(8.dp)
+                            ) // Adjust the corner radius as needed
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth() // Center the entire column horizontally
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Increase quantity"
+                            )
+                            Text(
+                                text = "Remove\nfrom\nCart",
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -69,13 +69,12 @@ fun ShoppingScreen(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
             modifier = Modifier
-                .padding(bottom = 16.dp),
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             // Left column with Filter dropdown
@@ -168,18 +167,30 @@ fun ShoppingScreen(
             getProducts(token)
         }
 
-        ProductsList(products = products ?: emptyList(), increaseQuantity = increaseQuantity, showSnackbarMessage = showSnackbarMessage)
+        ProductsList(
+            products = products ?: emptyList(),
+            increaseQuantity = increaseQuantity,
+            showSnackbarMessage = showSnackbarMessage
+        )
     }
 }
 
 @Composable
-fun ProductsList(products: List<Product>, increaseQuantity: (String, Long, Int) -> Unit, showSnackbarMessage: (String) -> Unit) {
+fun ProductsList(
+    products: List<Product>,
+    increaseQuantity: (String, Long, Int) -> Unit,
+    showSnackbarMessage: (String) -> Unit
+) {
     if (products.isEmpty()) {
         Text(text = "No products found")
     }
     LazyColumn {
         items(products) { product ->
-            ProductItem(product = product, increaseQuantity = increaseQuantity, showSnackbarMessage = showSnackbarMessage)
+            ProductItem(
+                product = product,
+                increaseQuantity = increaseQuantity,
+                showSnackbarMessage = showSnackbarMessage
+            )
         }
     }
 }
@@ -197,7 +208,11 @@ enum class FilterType(val readableText: String) {
 // TODO: add quantity change event
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductItem(product: Product, increaseQuantity: (String, Long, Int) -> Unit, showSnackbarMessage: (String) -> Unit) {
+fun ProductItem(
+    product: Product,
+    increaseQuantity: (String, Long, Int) -> Unit,
+    showSnackbarMessage: (String) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
     var selectedQuantity by remember { mutableIntStateOf(1) }
 

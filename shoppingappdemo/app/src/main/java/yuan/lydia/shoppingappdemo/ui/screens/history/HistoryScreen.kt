@@ -32,7 +32,11 @@ import java.util.Locale
 
 
 @Composable
-fun HistoryScreen(orderHistory: List<Order>?, getOrderHistory: (String) -> Unit) {
+fun HistoryScreen(
+    orderHistory: List<Order>?,
+    getOrderHistory: (String) -> Unit,
+    checkOutOrderDetails: (String) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -47,13 +51,16 @@ fun HistoryScreen(orderHistory: List<Order>?, getOrderHistory: (String) -> Unit)
             getOrderHistory(token)
         }
 
-        OrderHistoryList(orderHistory = orderHistory ?: emptyList())
+        OrderHistoryList(
+            orderHistory = orderHistory ?: emptyList(),
+            checkOutOrderDetails = checkOutOrderDetails
+        )
     }
 }
 
 
 @Composable
-fun OrderHistoryList(orderHistory: List<Order>) {
+fun OrderHistoryList(orderHistory: List<Order>, checkOutOrderDetails: (String) -> Unit = {}) {
     if (orderHistory.isEmpty()) {
         Text(text = "No order history")
         return
@@ -61,7 +68,7 @@ fun OrderHistoryList(orderHistory: List<Order>) {
     LazyColumn {
         orderHistory.forEach { order ->
             item {
-                OrderItem(order = order, onItemClick = { /*TODO*/ })
+                OrderItem(order = order, checkOutOrderDetails = { checkOutOrderDetails(order.orderId.toString()) })
             }
         }
     }
@@ -69,15 +76,17 @@ fun OrderHistoryList(orderHistory: List<Order>) {
 
 // TODO: add quantity change event
 @Composable
-fun OrderItem(order: Order, onItemClick: (Order) -> Unit) {
+fun OrderItem(order: Order, checkOutOrderDetails: (Order) -> Unit) {
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .clickable { onItemClick(order) } // Click on the whole card to trigger navigation
+            .clickable { checkOutOrderDetails(order) } // Click on the whole card to trigger navigation
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Left column for text
@@ -91,12 +100,11 @@ fun OrderItem(order: Order, onItemClick: (Order) -> Unit) {
                 Text("Date Placed: ${formatDate(order.datePlaced)}", fontSize = 14.sp)
             }
 
-            // Right column with icon button
             IconButton(
-                onClick = { onItemClick(order) }, // Trigger navigation when the button is clicked
+                onClick = { },
                 modifier = Modifier.size(48.dp)
             ) {
-                Icon(Icons.Default.Info, contentDescription = "Details")
+                Icon(Icons.Default.Info, contentDescription = "Click to check out order details")
             }
         }
     }

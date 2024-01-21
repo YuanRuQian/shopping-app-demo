@@ -1,8 +1,6 @@
 package yuan.lydia.shoppingappdemo.data.history
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,50 +12,61 @@ import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.ShoppingApplication
 import yuan.lydia.shoppingappdemo.network.history.HistoryRepository
 import yuan.lydia.shoppingappdemo.network.history.Order
-import yuan.lydia.shoppingappdemo.network.history.OrderHistoryResponse
+import yuan.lydia.shoppingappdemo.network.history.OrderDetail
 
 // TODO: how to sort the order history
-sealed interface UiState {
-
-    data class OrderHistorySuccess(val response: OrderHistoryResponse) : UiState
-
-    data class OrderHistoryNetworkError(val message: String) : UiState
-
-    data class OrderHistoryError(val response: OrderHistoryResponse) : UiState
-
-    data object Uninitialized : UiState
-
-    data object Loading : UiState
-}
 
 class HistoryViewModel(
     private val historyRepository: HistoryRepository
 ) : ViewModel() {
-    var uiState: UiState by mutableStateOf(UiState.Uninitialized)
-
 
     private val _orderHistory = MutableLiveData<List<Order>>()
     val orderHistory: LiveData<List<Order>>
         get() = _orderHistory
 
-    private suspend fun getOrderHistoryHelper(token: String): UiState {
-        return try {
+    private val _currentOrderDetails = MutableLiveData<OrderDetail?>(null)
+    val currentOrderDetails: LiveData<OrderDetail?>
+        get() = _currentOrderDetails
+
+    private suspend fun getOrderHistoryHelper(token: String) {
+        try {
             val response = historyRepository.getOrderHistory(token)
             if (response.status.success) {
                 _orderHistory.value = response.orders
-                UiState.OrderHistorySuccess(response)
             } else {
-                UiState.OrderHistoryError(response)
+                _orderHistory.value = emptyList()
+                Log.e("HistoryViewModel", "get order history error: ${response.status.message}")
             }
         } catch (e: retrofit2.HttpException) {
-            UiState.OrderHistoryNetworkError("Network error, please try again.")
+            Log.e("HistoryViewModel", "get order history error: ${e.message()}")
+            _orderHistory.value = emptyList()
         }
     }
 
     fun getOrderHistory(token: String) {
-        uiState = UiState.Loading
         viewModelScope.launch {
-            uiState = getOrderHistoryHelper(token)
+            getOrderHistoryHelper(token)
+        }
+    }
+
+    private suspend fun getOrderDetailsHelper(token: String, orderId: String) {
+        try {
+            val response = historyRepository.getOrderDetails(token, orderId)
+            if (response.status.success) {
+                _currentOrderDetails.value = response.order
+            } else {
+                _currentOrderDetails.value = null
+                Log.e("HistoryViewModel", "get order details error: ${response.status.message}")
+            }
+        } catch (e: retrofit2.HttpException) {
+            Log.e("HistoryViewModel", "get order details error: ${e.message()}")
+            _currentOrderDetails.value = null
+        }
+    }
+
+    fun getOrderDetails(token: String, orderId: String) {
+        viewModelScope.launch {
+            getOrderDetailsHelper(token, orderId)
         }
     }
 

@@ -48,6 +48,7 @@ import yuan.lydia.shoppingappdemo.data.utils.SnackbarViewModel
 import yuan.lydia.shoppingappdemo.data.utils.TokenManager
 import yuan.lydia.shoppingappdemo.ui.screens.cart.CartScreen
 import yuan.lydia.shoppingappdemo.ui.screens.history.HistoryScreen
+import yuan.lydia.shoppingappdemo.ui.screens.history.OrderDetailsScreen
 import yuan.lydia.shoppingappdemo.ui.screens.shopping.ShoppingScreen
 import yuan.lydia.shoppingappdemo.ui.screens.userAuth.LoginScreen
 import yuan.lydia.shoppingappdemo.ui.screens.userAuth.RegisterScreen
@@ -61,6 +62,8 @@ sealed class AppRoute(val route: String) {
     data object Cart : AppRoute("Cart")
     data object History : AppRoute("History")
     data object Wishlist : AppRoute("Wishlist")
+
+    data object OrderDetails : AppRoute("OrderDetails")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -178,6 +181,9 @@ fun AppCanvas(
                         orderHistory = historyViewModel.orderHistory.value,
                         getOrderHistory = { token ->
                             historyViewModel.getOrderHistory(token)
+                        },
+                        checkOutOrderDetails = { orderId ->
+                            navController.navigate("${AppRoute.OrderDetails.route}/${orderId}")
                         }
                     )
                 }
@@ -185,6 +191,21 @@ fun AppCanvas(
                 composable(AppRoute.Wishlist.route) {
                     WishlistScreen()
                 }
+
+                composable("${AppRoute.OrderDetails.route}/{orderId}") { backStackEntry ->
+                    val orderId = backStackEntry.arguments?.getString("orderId")
+                    if (orderId != null) {
+                        OrderDetailsScreen(
+                            getOrderDetail = { token ->
+                                historyViewModel.getOrderDetails(token, orderId)
+                            },
+                            orderDetail = historyViewModel.currentOrderDetails.value
+                        )
+                    } else {
+                        snackbarViewModel.showSnackbar("No order id found")
+                    }
+                }
+
             }
         }
     }
@@ -207,7 +228,6 @@ fun logout(
     snackbarViewModel.showSnackbar("See you next time!")
 }
 
-// TODO: add onClick event
 @Composable
 fun BottomNavigationBarButton(icon: ImageVector, text: String, onClick: () -> Unit) {
     Column(

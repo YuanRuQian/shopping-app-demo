@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +68,8 @@ fun OrderDetailsScreen(getOrderDetail: (String) -> Unit, orderDetail: OrderDetai
             Text(text = "Order ID: ${orderDetail.id}", fontWeight = FontWeight.Bold)
             Text(text = "Order Status: ${orderDetail.orderStatus}")
             Text(text = "Date Placed: ${formatDate(orderDetail.datePlaced)}")
+            Text(text = "Total: $${orderDetail.orderItems.sumOf { it.purchasedPrice * it.quantity }}")
+            Text(text = "You Saved: $${orderDetail.orderItems.sumOf { it.product.retailPrice * it.quantity - it.purchasedPrice * it.quantity }}")
 
             // Display order items
             if (orderDetail.orderItems.isNotEmpty()) {
@@ -97,11 +98,12 @@ fun OrderItemCard(orderItem: OrderItem) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text("Product: ${orderItem.product.name}")
+            Text("Product: ${orderItem.product.name}", fontWeight = FontWeight.Bold)
             Text("Description: ${orderItem.product.description}")
             Text("Retail Price: $${orderItem.product.retailPrice}")
             Text("Purchased Price: $${orderItem.purchasedPrice}")
             Text("Quantity: ${orderItem.quantity}")
+            Text("Total: $${orderItem.purchasedPrice * orderItem.quantity}")
         }
     }
 }

@@ -1,24 +1,32 @@
 package yuan.lydia.shoppingappdemo.ui.screens.shopping
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -39,6 +47,7 @@ import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import yuan.lydia.shoppingappdemo.data.shopping.ShoppingViewModel
@@ -129,7 +138,12 @@ fun ShoppingScreen(shoppingViewModel: ShoppingViewModel = viewModel(factory = Sh
                                 maxPrice = maxPrice
                             )
                         },
-                        label = { Text(text = "Max Price", fontSize = MaterialTheme.typography.bodyMedium.fontSize) },
+                        label = {
+                            Text(
+                                text = "Max Price",
+                                fontSize = MaterialTheme.typography.bodyMedium.fontSize
+                            )
+                        },
                         keyboardOptions = KeyboardOptions.Default.copy(
                             keyboardType = KeyboardType.Number
                         ),
@@ -198,7 +212,7 @@ fun ProductItem(product: Product) {
             ) {
                 Column(
                     modifier = Modifier
-                        .weight(1f) // Fluid left column
+                        .weight(0.618f) // Fluid left column
                         .padding(16.dp)
                 ) {
                     Text(
@@ -285,6 +299,7 @@ fun ProductItem(product: Product) {
                 // Right column with Add to Cart button
                 Column(
                     modifier = Modifier
+                        .weight(0.382f)
                         .padding(horizontal = 16.dp)
                 ) {
                     Button(
@@ -292,9 +307,27 @@ fun ProductItem(product: Product) {
                             // Add logic to add the product to the cart with the selected quantity
                             // You can pass the product and quantity to a function to handle cart addition
                             // TODO: handleAddToCart(product, selectedQuantity)
-                        }
+                        },
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .height(IntrinsicSize.Min) // Optional: Ensure the button height is not too tall
+                            .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(8.dp)) // Adjust the corner radius as needed
                     ) {
-                        Text(text = "Add to Cart")
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth() // Center the entire column horizontally
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = null, // Content description can be null if the icon is decorative
+                                modifier = Modifier.size(24.dp) // Optional: Adjust size as needed
+                            )
+                            Text(
+                                text = "Add to Cart",
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }

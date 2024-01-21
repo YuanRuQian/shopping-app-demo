@@ -43,6 +43,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
+import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.CartWishlistManagementViewModel
 import yuan.lydia.shoppingappdemo.data.history.HistoryViewModel
 import yuan.lydia.shoppingappdemo.data.utils.SnackbarViewModel
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
@@ -69,7 +70,10 @@ sealed class AppRoute(val route: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppCanvas(
-    snackbarViewModel: SnackbarViewModel = viewModel(factory = SnackbarViewModel.Factory)
+    snackbarViewModel: SnackbarViewModel = viewModel(factory = SnackbarViewModel.Factory),
+    cartWishlistManagementViewModel: CartWishlistManagementViewModel = viewModel(
+        factory = CartWishlistManagementViewModel.Factory
+    ),
 ) {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -181,7 +185,12 @@ fun AppCanvas(
                 }
 
                 composable(AppRoute.Cart.route) {
-                    CartScreen()
+                    CartScreen(
+                        loadUserCartData = { username ->
+                            cartWishlistManagementViewModel.loadUserCartData(username)
+                        },
+                        userCartData = cartWishlistManagementViewModel.userCartLiveData.value,
+                    )
                 }
 
                 composable(AppRoute.History.route) {

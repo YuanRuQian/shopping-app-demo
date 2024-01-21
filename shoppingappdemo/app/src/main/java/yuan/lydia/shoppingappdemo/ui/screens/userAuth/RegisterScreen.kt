@@ -205,6 +205,8 @@ fun RegisterScreen(
                 }
                 isRegisterButtonEnabled = true
             }
+
+            else -> {}
         }
     }
 }

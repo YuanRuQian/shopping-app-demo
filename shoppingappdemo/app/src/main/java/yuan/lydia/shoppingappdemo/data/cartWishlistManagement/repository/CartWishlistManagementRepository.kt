@@ -12,7 +12,7 @@ interface CartWishlistManagementRepository {
 
     suspend fun reduceQuantity(username: String, productId: String, reducedQuantity: Int)
 
-    fun getUserCart(username: String): Flow<List<CartItemEntity>>
+    fun loadUserCartData(username: String): Flow<List<CartItemEntity>>
 
     suspend fun clearCart(username: String)
 
@@ -22,7 +22,7 @@ interface CartWishlistManagementRepository {
 
     suspend fun removeFromWishlist(username: String, productId: String)
 
-    fun getUserWishlist(username: String): Flow<List<WishlistItemEntity>>
+    fun loadUserWishlistData(username: String): Flow<List<WishlistItemEntity>>
 
     suspend fun clearWishlistItem(username: String, productId: String)
 }

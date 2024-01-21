@@ -181,6 +181,8 @@ fun LoginScreen(
                 }
                 isLoginButtonEnabled = true
             }
+
+            else -> {}
         }
     }
 }

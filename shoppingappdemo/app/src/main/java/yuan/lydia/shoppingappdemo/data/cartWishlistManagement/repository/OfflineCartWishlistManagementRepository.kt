@@ -16,7 +16,7 @@ class OfflineCartWishlistManagementRepository(
 
     override suspend fun reduceQuantity(username: String, productId: String, reducedQuantity: Int) = cartItemDao.reduceQuantity(username, productId, reducedQuantity)
 
-    override fun getUserCart(username: String): Flow<List<CartItemEntity>> = cartItemDao.getUserCartItems(username)
+    override fun loadUserCartData(username: String): Flow<List<CartItemEntity>> = cartItemDao.getUserCartItems(username)
 
     override suspend fun clearCart(username: String) = cartItemDao.clearCart(username)
 
@@ -27,7 +27,7 @@ class OfflineCartWishlistManagementRepository(
     override suspend fun removeFromWishlist(username: String, productId: String) = wishlistItemDao.removeProductFromWishlist(username, productId)
 
 
-    override fun getUserWishlist(username: String): Flow<List<WishlistItemEntity>> = wishlistItemDao.getUserWishlistItems(username)
+    override fun loadUserWishlistData(username: String): Flow<List<WishlistItemEntity>> = wishlistItemDao.getUserWishlistItems(username)
 
     override suspend fun clearWishlistItem(username: String, productId: String) = wishlistItemDao.removeProductFromWishlist(username, productId)
 }

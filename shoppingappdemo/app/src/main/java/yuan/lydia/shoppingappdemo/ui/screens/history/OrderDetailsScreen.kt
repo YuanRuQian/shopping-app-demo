@@ -3,6 +3,8 @@ package yuan.lydia.shoppingappdemo.ui.screens.history
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,8 +34,13 @@ import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.history.OrderDetail
 import yuan.lydia.shoppingappdemo.network.history.OrderItem
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OrderDetailsScreen(getOrderDetail: (String) -> Unit, orderDetail: OrderDetail?, onBack: () -> Unit) {
+fun OrderDetailsScreen(
+    getOrderDetail: (String) -> Unit,
+    orderDetail: OrderDetail?,
+    onBack: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -46,7 +55,8 @@ fun OrderDetailsScreen(getOrderDetail: (String) -> Unit, orderDetail: OrderDetai
             getOrderDetail(token)
         }
 
-        val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+        val onBackPressedDispatcher =
+            LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
         var backPressHandled by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
         BackHandler(enabled = !backPressHandled) {
@@ -64,19 +74,30 @@ fun OrderDetailsScreen(getOrderDetail: (String) -> Unit, orderDetail: OrderDetai
         if (orderDetail == null) {
             Text(text = "Order details not found")
         } else {
-            // Display order details
-            Text(text = "Order ID: ${orderDetail.id}", fontWeight = FontWeight.Bold)
-            Text(text = "Order Status: ${orderDetail.orderStatus}")
-            Text(text = "Date Placed: ${formatDate(orderDetail.datePlaced)}")
-            Text(text = "Total: $${orderDetail.orderItems.sumOf { it.purchasedPrice * it.quantity }}")
-            Text(text = "You Saved: $${orderDetail.orderItems.sumOf { it.product.retailPrice * it.quantity - it.purchasedPrice * it.quantity }}")
 
             // Display order items
             if (orderDetail.orderItems.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Order Items:", fontWeight = FontWeight.Bold)
-                orderDetail.orderItems.forEach { orderItem ->
-                    OrderItemCard(orderItem = orderItem)
+                LazyColumn {
+                    stickyHeader {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Top
+                        ) {
+                            Text(text = "Order ID: ${orderDetail.id}", fontWeight = FontWeight.Bold)
+                            Text(text = "Order Status: ${orderDetail.orderStatus}")
+                            Text(text = "Date Placed: ${formatDate(orderDetail.datePlaced)}")
+                            Text(text = "Total: $${orderDetail.orderItems.sumOf { it.purchasedPrice * it.quantity }}")
+                            Text(text = "You Saved: $${orderDetail.orderItems.sumOf { it.product.retailPrice * it.quantity - it.purchasedPrice * it.quantity }}")
+                            Text(text = "Order Items:", fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                    }
+                    items(orderDetail.orderItems.size) { index ->
+                        OrderItemCard(orderItem = orderDetail.orderItems[index])
+                    }
                 }
             } else {
                 Spacer(modifier = Modifier.height(16.dp))

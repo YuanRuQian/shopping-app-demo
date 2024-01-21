@@ -214,7 +214,7 @@ fun ProductItem(
     showSnackbarMessage: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedQuantity by remember { mutableIntStateOf(1) }
+    val (selectedQuantity, setSelectedQuantity) = remember { mutableIntStateOf(1) }
 
     val context = LocalContext.current
     val username = UserInfoManager.getInstance(context).getUsername()!!
@@ -307,7 +307,7 @@ fun ProductItem(
                                                     text = quantity.toString(),
                                                 )
                                             }, onClick = {
-                                                selectedQuantity = quantity
+                                                setSelectedQuantity(quantity)
                                                 expanded = false
                                             })
                                         }
@@ -325,43 +325,62 @@ fun ProductItem(
                         .weight(0.382f)
                         .padding(horizontal = 16.dp)
                 ) {
-                    Button(
-                        onClick = {
-                            increaseQuantity(
-                                username,
-                                product.id,
-                                selectedQuantity
-                            )
-                            showSnackbarMessage("Added $selectedQuantity ${product.name} to cart!")
-                            selectedQuantity = 1
-                            // TODO: update cart button state and dropdown menu state
-                        },
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .height(IntrinsicSize.Min) // Optional: Ensure the button height is not too tall
-                            .background(
-                                MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(8.dp)
-                            ) // Adjust the corner radius as needed
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                            modifier = Modifier.fillMaxWidth() // Center the entire column horizontally
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ShoppingCart,
-                                contentDescription = null, // Content description can be null if the icon is decorative
-                                modifier = Modifier.size(24.dp) // Optional: Adjust size as needed
-                            )
-                            Text(
-                                text = "Add to Cart",
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
+                    AddToCartButton(
+                        increaseQuantity = increaseQuantity,
+                        product = product,
+                        showSnackbarMessage = showSnackbarMessage,
+                        username = username,
+                        setSelectedQuantity = setSelectedQuantity,
+                        selectedQuantity = selectedQuantity
+                    )
                 }
             }
+        }
+    }
+}
+
+
+@Composable
+fun AddToCartButton(
+    increaseQuantity: (String, Long, Int) -> Unit,
+    product: Product,
+    showSnackbarMessage: (String) -> Unit,
+    username: String,
+    setSelectedQuantity: (Int) -> Unit,
+    selectedQuantity: Int
+) {
+    Button(
+        onClick = {
+            increaseQuantity(
+                username,
+                product.id,
+                selectedQuantity
+            )
+            showSnackbarMessage("Added $selectedQuantity ${product.name} to cart!")
+            setSelectedQuantity(1)
+        },
+        modifier = Modifier
+            .padding(8.dp)
+            .height(IntrinsicSize.Min) // Optional: Ensure the button height is not too tall
+            .background(
+                MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(8.dp)
+            ) // Adjust the corner radius as needed
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth() // Center the entire column horizontally
+        ) {
+            Icon(
+                imageVector = Icons.Default.ShoppingCart,
+                contentDescription = null, // Content description can be null if the icon is decorative
+                modifier = Modifier.size(24.dp) // Optional: Adjust size as needed
+            )
+            Text(
+                text = "Add to Cart",
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

@@ -9,6 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.CartWishlistManagementDatabase
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.repository.CartWishlistManagementRepository
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.repository.OfflineCartWishlistManagementRepository
+import yuan.lydia.shoppingappdemo.network.cart.CartApiServices
 import yuan.lydia.shoppingappdemo.network.history.HistoryApiServices
 import yuan.lydia.shoppingappdemo.network.history.HistoryRepository
 import yuan.lydia.shoppingappdemo.network.history.NetworkHistoryRepository
@@ -43,7 +44,9 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
     override val cartWishlistManagementRepository: CartWishlistManagementRepository by lazy {
         OfflineCartWishlistManagementRepository(
             CartWishlistManagementDatabase.getDatabase(context).cartItemDao(),
-            CartWishlistManagementDatabase.getDatabase(context).wishlistItemDao())
+            CartWishlistManagementDatabase.getDatabase(context).wishlistItemDao(),
+            cartServices
+        )
     }
 
 
@@ -75,5 +78,9 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
 
     private val historyService by lazy {
         serviceBase.create(HistoryApiServices::class.java)
+    }
+
+    private val cartServices by lazy {
+        serviceBase.create(CartApiServices::class.java)
     }
 }

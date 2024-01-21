@@ -52,7 +52,9 @@ fun CartScreen(
     loadUserCartData: (String) -> Unit,
     userCartDataLiveData: LiveData<List<CartItemEntity>>,
     updateQuantity: (String, Long, Int) -> Unit,
-    showSnackbarMessage: (String) -> Unit
+    showSnackbarMessage: (String) -> Unit,
+    checkout: (String, List<CartItemEntity>) -> Unit,
+    onCheckoutSuccess: (String) -> Unit
 ) {
     val context = LocalContext.current
     val userInfoManager = UserInfoManager.getInstance(context)
@@ -62,7 +64,22 @@ fun CartScreen(
     val productsData by productsLiveData.observeAsState()
 
     if (username == null || token == null) {
-        Text(text = "Please login to view your cart")
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Please login to view your cart",
+                    fontFamily = MaterialTheme.typography.titleLarge.fontFamily
+                )
+            }
+        }
         return
     }
 
@@ -82,7 +99,16 @@ fun CartScreen(
     ) {
 
         if (userCartData.isNullOrEmpty()) {
-            Text(text = "$username's cart is empty!")
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "$username's cart is empty!",
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
             return
         }
 
@@ -92,7 +118,11 @@ fun CartScreen(
                 updateQuantity(username, productId, newQuantity)
             },
             showSnackbarMessage = showSnackbarMessage,
-            getProductDataByProductId = ::getProductDataByProductId
+            getProductDataByProductId = ::getProductDataByProductId,
+            token = token,
+            username = username,
+            checkout = checkout,
+            onCheckoutSuccess = onCheckoutSuccess
         )
     }
 }
@@ -102,7 +132,11 @@ fun UserCart(
     userCartData: List<CartItemEntity>,
     updateQuantity: (String, Long, Int) -> Unit,
     showSnackbarMessage: (String) -> Unit,
-    getProductDataByProductId: (Long) -> Product?
+    getProductDataByProductId: (Long) -> Product?,
+    token: String,
+    username: String,
+    checkout: (String, List<CartItemEntity>) -> Unit,
+    onCheckoutSuccess: (String) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
@@ -122,7 +156,6 @@ fun UserCart(
                 .background(Color.White),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // TODO: Implement total price
             Text(
                 text = "Total: ${userCartData.sumOf { it.quantity }} items, $${
                     userCartData.sumOf {
@@ -137,8 +170,8 @@ fun UserCart(
             )
             Button(
                 onClick = {
-                    // TODO: Implement checkout
-                    showSnackbarMessage("Checkout not implemented")
+                    checkout(token, userCartData)
+                    onCheckoutSuccess(username)
                 },
                 modifier = Modifier.padding(16.dp)
             ) {
@@ -218,6 +251,11 @@ fun CartItem(
                                 // Decrease quantity
                                 val selectedQuantity = maxOf(cartItem.quantity - 1, 0)
                                 updateQuantity(username, cartItem.productId, selectedQuantity)
+                                if (selectedQuantity > 0) {
+                                    showSnackbarMessage("Remove one ${productInfo.name} from cart")
+                                } else {
+                                    showSnackbarMessage("Remove ${productInfo.name} from cart")
+                                }
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Remove,
@@ -235,6 +273,7 @@ fun CartItem(
                             IconButton(onClick = {
                                 // Increase quantity
                                 updateQuantity(username, cartItem.productId, cartItem.quantity + 1)
+                                showSnackbarMessage("Add one more ${productInfo.name} to cart")
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Add,
@@ -259,7 +298,7 @@ fun CartItem(
                 ) {
                     Button(
                         onClick = {
-                            updateQuantity(username, cartItem.productId, cartItem.quantity + 1)
+                            updateQuantity(username, cartItem.productId, 0)
                             showSnackbarMessage("Remove ${productInfo.name} from cart")
                         },
                         modifier = Modifier

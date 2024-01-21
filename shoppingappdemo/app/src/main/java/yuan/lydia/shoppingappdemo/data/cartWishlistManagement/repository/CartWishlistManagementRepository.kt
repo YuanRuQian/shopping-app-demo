@@ -3,8 +3,12 @@ package yuan.lydia.shoppingappdemo.data.cartWishlistManagement.repository
 import kotlinx.coroutines.flow.Flow
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.CartItemEntity
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.WishlistItemEntity
+import yuan.lydia.shoppingappdemo.network.cart.OrderRequest
+import yuan.lydia.shoppingappdemo.network.cart.OrderResponse
 
 interface CartWishlistManagementRepository {
+
+    suspend fun submitOrder(token: String, orderRequest: OrderRequest): OrderResponse
 
     fun getCartItemInfo(username: String, productId: Long): Flow<CartItemEntity?>
 

@@ -65,8 +65,9 @@ sealed class AppRoute(val route: String) {
     data object History : AppRoute("History")
     data object Wishlist : AppRoute("Wishlist")
 
-    data object OrderDetails : AppRoute("OrderDetails")
+    data object OrderDetails : AppRoute("Order Details")
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,14 +109,12 @@ fun AppCanvas(
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
+                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+                    val destination = navBackStackEntry?.destination?.route
                     if (!isUserLoggedIn) {
                         Text("Shopping App Demo by Lydia Yuan")
                     } else {
-                        Text(
-                            "Enjoy shopping, ${
-                                UserInfoManager.getInstance(context).getUsername()
-                            }!"
-                        )
+                        Text(text = getRouteDisplayName(destination))
                     }
                 },
                 actions = {
@@ -223,6 +222,18 @@ fun AppCanvas(
                         },
                         showSnackbarMessage = { message ->
                             snackbarViewModel.showSnackbar(message)
+                        },
+                        checkout = { token, cartItems ->
+                            cartWishlistManagementViewModel.checkout(token, cartItems)
+                        },
+                        onCheckoutSuccess = { username ->
+                            cartWishlistManagementViewModel.clearUserCartAndReloadUserCartData(
+                                username
+                            )
+                            navController.navigate(AppRoute.Shopping.route) {
+                                popUpTo(AppRoute.Cart.route) { inclusive = true }
+                            }
+                            snackbarViewModel.showSnackbar("Order submitted successfully, $username!")
                         }
                     )
                 }
@@ -393,5 +404,17 @@ fun ExitButton(
                 contentDescription = "Log out and exit the app"
             )
         }
+    }
+}
+
+fun getRouteDisplayName(route: String?): String {
+    if (route == null) {
+        return "Shopping App Demo by Lydia Yuan"
+    }
+    val routeSegments = route.split("/")
+    return if (routeSegments.isNotEmpty()) {
+        routeSegments[0]
+    } else {
+        route
     }
 }

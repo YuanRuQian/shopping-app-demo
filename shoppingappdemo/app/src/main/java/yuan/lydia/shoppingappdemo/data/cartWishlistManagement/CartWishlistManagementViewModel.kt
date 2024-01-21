@@ -11,6 +11,8 @@ import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.ShoppingApplication
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.CartItemEntity
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.repository.CartWishlistManagementRepository
+import yuan.lydia.shoppingappdemo.network.cart.Order
+import yuan.lydia.shoppingappdemo.network.cart.OrderRequest
 
 class CartWishlistManagementViewModel(private val cartWishlistManagementRepository: CartWishlistManagementRepository) :
     ViewModel() {
@@ -36,6 +38,33 @@ class CartWishlistManagementViewModel(private val cartWishlistManagementReposito
     fun increaseQuantityThenReloadUserCartData(username: String, productId: Long, addedQuantity: Int) {
         viewModelScope.launch {
             cartWishlistManagementRepository.increaseQuantity(username, productId, addedQuantity)
+            loadUserCartData(username)
+        }
+    }
+
+    private fun mapCartItemEntitiesToOrderRequest(cartItems: List<CartItemEntity>): OrderRequest {
+        val orders = cartItems.map { cartItem ->
+            Order(
+                productId = cartItem.productId,
+                quantity = cartItem.quantity.toLong()
+            )
+        }
+
+        return OrderRequest(order = orders)
+    }
+
+
+    fun checkout(token: String, cartItems: List<CartItemEntity>) {
+        val orderRequest = mapCartItemEntitiesToOrderRequest(cartItems)
+        viewModelScope.launch {
+            cartWishlistManagementRepository.submitOrder(token, orderRequest)
+            // TODO: handle error and show success message if success
+        }
+    }
+
+    fun clearUserCartAndReloadUserCartData(username: String) {
+        viewModelScope.launch {
+            cartWishlistManagementRepository.clearCart(username)
             loadUserCartData(username)
         }
     }

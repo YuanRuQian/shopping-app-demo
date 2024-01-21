@@ -5,11 +5,17 @@ import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.daos.CartItemDao
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.daos.WishlistItemDao
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.CartItemEntity
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.WishlistItemEntity
+import yuan.lydia.shoppingappdemo.network.cart.CartApiServices
+import yuan.lydia.shoppingappdemo.network.cart.OrderRequest
+import yuan.lydia.shoppingappdemo.network.cart.OrderResponse
 
 class OfflineCartWishlistManagementRepository(
     private val cartItemDao: CartItemDao,
-    private val wishlistItemDao: WishlistItemDao
+    private val wishlistItemDao: WishlistItemDao,
+    private val cartApiServices: CartApiServices
 ): CartWishlistManagementRepository {
+    override suspend fun submitOrder(token: String, orderRequest: OrderRequest): OrderResponse = cartApiServices.submitOrder(orderRequest, "Bearer $token")
+
     override fun getCartItemInfo(username: String, productId: Long): Flow<CartItemEntity?> = cartItemDao.getCartItemInfo(username, productId)
     override suspend fun updateQuantity(username: String, productId: Long, newQuantity: Int) = cartItemDao.updateQuantity(username, productId, newQuantity)
     override suspend fun increaseQuantity(username: String, productId: Long, addedQuantity: Int) = cartItemDao.increaseQuantity(username, productId, addedQuantity)

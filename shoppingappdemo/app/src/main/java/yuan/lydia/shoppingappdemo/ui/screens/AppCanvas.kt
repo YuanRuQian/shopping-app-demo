@@ -43,6 +43,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
+import yuan.lydia.shoppingappdemo.data.history.HistoryViewModel
 import yuan.lydia.shoppingappdemo.data.utils.SnackbarViewModel
 import yuan.lydia.shoppingappdemo.data.utils.TokenManager
 import yuan.lydia.shoppingappdemo.ui.screens.cart.CartScreen
@@ -71,6 +72,7 @@ fun AppCanvas(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val (isUserLoggedIn, setIsUserLoggedIn) = remember { mutableStateOf(false) }
+    val historyViewModel: HistoryViewModel = viewModel(factory = HistoryViewModel.Factory)
 
     LaunchedEffect(key1 = true) {
         setIsUserLoggedIn(TokenManager.getInstance(context).isTokenExist())
@@ -172,7 +174,12 @@ fun AppCanvas(
                 }
 
                 composable(AppRoute.History.route) {
-                    HistoryScreen()
+                    HistoryScreen(
+                        orderHistory = historyViewModel.orderHistory.value,
+                        getOrderHistory = { token ->
+                            historyViewModel.getOrderHistory(token)
+                        }
+                    )
                 }
 
                 composable(AppRoute.Wishlist.route) {

@@ -18,15 +18,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import yuan.lydia.shoppingappdemo.data.history.HistoryViewModel
 import yuan.lydia.shoppingappdemo.data.utils.TokenManager
 import yuan.lydia.shoppingappdemo.network.history.Order
 import java.text.SimpleDateFormat
@@ -35,7 +32,7 @@ import java.util.Locale
 
 
 @Composable
-fun HistoryScreen(historyViewModel: HistoryViewModel = viewModel(factory = HistoryViewModel.Factory)) {
+fun HistoryScreen(orderHistory: List<Order>?, getOrderHistory: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -45,13 +42,12 @@ fun HistoryScreen(historyViewModel: HistoryViewModel = viewModel(factory = Histo
     ) {
         val context = LocalContext.current
         val token = TokenManager.getInstance(context).getToken()!!
-        val orderHistory = historyViewModel.orderHistory.observeAsState()
 
         LaunchedEffect(key1 = true) {
-            historyViewModel.getOrderHistory(token)
+            getOrderHistory(token)
         }
 
-        OrderHistoryList(orderHistory = orderHistory.value ?: emptyList())
+        OrderHistoryList(orderHistory = orderHistory ?: emptyList())
     }
 }
 

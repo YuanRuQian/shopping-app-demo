@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
@@ -17,6 +20,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -33,24 +37,113 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import yuan.lydia.shoppingappdemo.data.shopping.ShoppingViewModel
 import yuan.lydia.shoppingappdemo.data.utils.TokenManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShoppingScreen(shoppingViewModel: ShoppingViewModel = viewModel(factory = ShoppingViewModel.Factory)) {
+    var maxPrice: Int? by remember { mutableStateOf(null) }
+    var expanded by remember { mutableStateOf(false) }
+    var selectedFilteredType by remember { mutableStateOf(FilterType.NONE) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Row(
+            modifier = Modifier
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            // Left column with Filter dropdown
+            Box(modifier = Modifier.weight(1f)) {
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it }) {
+                    CompositionLocalProvider(LocalTextInputService provides null) {
+                        Row(
+                            modifier = Modifier
+                                .menuAnchor(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            TextField(
+                                readOnly = true,
+                                value = selectedFilteredType.readableText,
+                                onValueChange = {},
+                                prefix = { Text("Filter:") },
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                        expanded = expanded
+                                    )
+                                },
+                                colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .menuAnchor()
+                            )
+
+                            ExposedDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                            ) {
+                                for (filter in FilterType.entries) {
+                                    DropdownMenuItem(text = {
+                                        Text(
+                                            text = filter.readableText,
+                                        )
+                                    }, onClick = {
+                                        selectedFilteredType = filter
+                                        shoppingViewModel.getFilteredProducts(
+                                            filterType = filter,
+                                            maxPrice = if (filter == FilterType.NO_MORE_THAN_MAX_PRICE) maxPrice else null
+                                        )
+                                        expanded = false
+                                    })
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (selectedFilteredType == FilterType.NO_MORE_THAN_MAX_PRICE) {
+                Box(
+                    modifier = Modifier
+                        .width(100.dp)
+                ) {
+                    OutlinedTextField(
+                        value = maxPrice?.toString() ?: "",
+                        onValueChange = {
+                            maxPrice = it.toIntOrNull()
+                            shoppingViewModel.getFilteredProducts(
+                                filterType = selectedFilteredType,
+                                maxPrice = maxPrice
+                            )
+                        },
+                        label = { Text(text = "Max Price", fontSize = MaterialTheme.typography.bodyMedium.fontSize) },
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Number
+                        ),
+                        visualTransformation = if (maxPrice == null) VisualTransformation.None else VisualTransformation.None // Hide text when null
+                    )
+
+                }
+            }
+        }
+
+
         val context = LocalContext.current
         val token = TokenManager.getInstance(context).getToken()!!
-        val products = shoppingViewModel.products.observeAsState()
+        val products = shoppingViewModel.filteredProducts.observeAsState()
 
         LaunchedEffect(key1 = true) {
             shoppingViewModel.getProducts(token)
@@ -60,17 +153,27 @@ fun ShoppingScreen(shoppingViewModel: ShoppingViewModel = viewModel(factory = Sh
     }
 }
 
-
 @Composable
 fun ProductsList(products: List<Product>) {
+    if (products.isEmpty()) {
+        Text(text = "No products found")
+    }
     LazyColumn {
-        products.forEach { product ->
-            item {
-                ProductItem(product = product)
-            }
+        items(products) { product ->
+            ProductItem(product = product)
         }
     }
 }
+
+enum class FilterType(val readableText: String) {
+    NONE("None"),
+    LOW_TO_HIGH("Price Low to High"),
+    HIGH_TO_LOW("Price High to Low"),
+    ALPHABETICAL_ASC("Sort A-Z"),
+    ALPHABETICAL_DESC("Sort Z-A"),
+    NO_MORE_THAN_MAX_PRICE("Under Max Price")
+}
+
 
 // TODO: add quantity change event
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,7 +201,11 @@ fun ProductItem(product: Product) {
                         .weight(1f) // Fluid left column
                         .padding(16.dp)
                 ) {
-                    Text(text = product.name, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.bodyLarge.fontSize)
+                    Text(
+                        text = product.name,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                    )
                     Text(
                         text = product.description,
                         modifier = Modifier.padding(top = 4.dp),

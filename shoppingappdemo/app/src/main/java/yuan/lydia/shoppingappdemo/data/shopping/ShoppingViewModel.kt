@@ -1,8 +1,6 @@
 package yuan.lydia.shoppingappdemo.data.shopping
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,50 +11,61 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.ShoppingApplication
 import yuan.lydia.shoppingappdemo.network.shopping.Product
-import yuan.lydia.shoppingappdemo.network.shopping.ProductsResponse
 import yuan.lydia.shoppingappdemo.network.shopping.ShoppingRepository
+import yuan.lydia.shoppingappdemo.ui.screens.shopping.FilterType
 
-sealed interface UiState {
-
-    data class ProductsSuccess(val response: ProductsResponse) : UiState
-
-    data class ProductNetworkError(val message: String) : UiState
-
-    data class ProductError(val response: ProductsResponse) : UiState
-
-    data object Uninitialized : UiState
-
-    data object Loading : UiState
-}
 
 class ShoppingViewModel(
     private val shoppingRepository: ShoppingRepository
 ) : ViewModel() {
-    var uiState: UiState by mutableStateOf(UiState.Uninitialized)
-
 
     private val _products = MutableLiveData<List<Product>>()
-    val products: LiveData<List<Product>>
-        get() = _products
+    private val _filteredProducts = MutableLiveData<List<Product>>()
+    val filteredProducts: LiveData<List<Product>>
+        get() = _filteredProducts
 
-    private suspend fun getProductsHelper(token: String): UiState {
-        return try {
+    private suspend fun getProductsHelper(token: String) {
+        try {
             val response = shoppingRepository.getProducts(token)
             if (response.status.success) {
                 _products.value = response.products
-                UiState.ProductsSuccess(response)
             } else {
-                UiState.ProductError(response)
+                _products.value = emptyList()
+                Log.e("ShoppingViewModel", "get products error: ${response.status.message}")
             }
         } catch (e: retrofit2.HttpException) {
-            UiState.ProductNetworkError("Network error, please try again.")
+            _products.value = emptyList()
+            Log.e("ShoppingViewModel", "get products error: ${e.message()}")
         }
     }
 
     fun getProducts(token: String) {
-        uiState = UiState.Loading
         viewModelScope.launch {
-            uiState = getProductsHelper(token)
+            getProductsHelper(token)
+            applyFilter(FilterType.NONE, null)
+        }
+    }
+
+    fun getFilteredProducts(filterType: FilterType, maxPrice: Int?) {
+        applyFilter(filterType, maxPrice)
+    }
+
+    private fun applyFilter(filterType: FilterType, maxPrice: Int?) {
+        _filteredProducts.value = when (filterType) {
+            FilterType.NONE -> _products.value ?: emptyList()
+            FilterType.LOW_TO_HIGH -> _products.value?.sortedBy { it.retailPrice } ?: emptyList()
+            FilterType.HIGH_TO_LOW -> _products.value?.sortedByDescending { it.retailPrice }
+                ?: emptyList()
+
+            FilterType.ALPHABETICAL_ASC -> _products.value?.sortedBy { it.name } ?: emptyList()
+            FilterType.ALPHABETICAL_DESC -> _products.value?.sortedByDescending { it.name }
+                ?: emptyList()
+
+            FilterType.NO_MORE_THAN_MAX_PRICE -> if (maxPrice != null) {
+                _products.value?.filter { it.retailPrice <= maxPrice } ?: emptyList()
+            } else {
+                _products.value ?: emptyList()
+            }
         }
     }
 

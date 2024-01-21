@@ -45,6 +45,7 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.CartWishlistManagementViewModel
 import yuan.lydia.shoppingappdemo.data.history.HistoryViewModel
+import yuan.lydia.shoppingappdemo.data.shopping.ShoppingViewModel
 import yuan.lydia.shoppingappdemo.data.utils.SnackbarViewModel
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.ui.screens.cart.CartScreen
@@ -74,6 +75,7 @@ fun AppCanvas(
     cartWishlistManagementViewModel: CartWishlistManagementViewModel = viewModel(
         factory = CartWishlistManagementViewModel.Factory
     ),
+    shoppingViewModel: ShoppingViewModel = viewModel(factory = ShoppingViewModel.Factory)
 ) {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -181,7 +183,15 @@ fun AppCanvas(
                     )
                 }
                 composable(AppRoute.Shopping.route) {
-                    ShoppingScreen()
+                    ShoppingScreen(
+                        getFilteredProducts = { filter, maxPrice ->
+                            shoppingViewModel.getFilteredProducts(filter, maxPrice)
+                        },
+                        getProducts = {
+                            shoppingViewModel.getProducts(it)
+                        },
+                        productsLiveData = shoppingViewModel.filteredProducts
+                    )
                 }
 
                 composable(AppRoute.Cart.route) {
@@ -195,7 +205,7 @@ fun AppCanvas(
 
                 composable(AppRoute.History.route) {
                     HistoryScreen(
-                        orderHistory = historyViewModel.orderHistory.value,
+                        orderHistoryLiveData = historyViewModel.orderHistory,
                         getOrderHistory = { token ->
                             historyViewModel.getOrderHistory(token)
                         },

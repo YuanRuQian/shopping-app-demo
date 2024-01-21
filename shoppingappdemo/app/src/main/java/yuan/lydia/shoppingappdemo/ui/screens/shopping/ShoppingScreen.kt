@@ -49,17 +49,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import yuan.lydia.shoppingappdemo.data.shopping.ShoppingViewModel
+import androidx.lifecycle.LiveData
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShoppingScreen(shoppingViewModel: ShoppingViewModel = viewModel(factory = ShoppingViewModel.Factory)) {
+fun ShoppingScreen(
+    getFilteredProducts: (filterType: FilterType, maxPrice: Int?) -> Unit,
+    getProducts: (String) -> Unit,
+    productsLiveData: LiveData<List<Product>>
+) {
     var maxPrice: Int? by remember { mutableStateOf(null) }
     var expanded by remember { mutableStateOf(false) }
     var selectedFilteredType by remember { mutableStateOf(FilterType.NONE) }
+    val products by productsLiveData.observeAsState()
 
     Column(
         modifier = Modifier
@@ -111,9 +115,9 @@ fun ShoppingScreen(shoppingViewModel: ShoppingViewModel = viewModel(factory = Sh
                                         )
                                     }, onClick = {
                                         selectedFilteredType = filter
-                                        shoppingViewModel.getFilteredProducts(
-                                            filterType = filter,
-                                            maxPrice = if (filter == FilterType.NO_MORE_THAN_MAX_PRICE) maxPrice else null
+                                        getFilteredProducts(
+                                            filter,
+                                            if (filter == FilterType.NO_MORE_THAN_MAX_PRICE) maxPrice else null
                                         )
                                         expanded = false
                                     })
@@ -133,9 +137,9 @@ fun ShoppingScreen(shoppingViewModel: ShoppingViewModel = viewModel(factory = Sh
                         value = maxPrice?.toString() ?: "",
                         onValueChange = {
                             maxPrice = it.toIntOrNull()
-                            shoppingViewModel.getFilteredProducts(
-                                filterType = selectedFilteredType,
-                                maxPrice = maxPrice
+                            getFilteredProducts(
+                                selectedFilteredType,
+                                maxPrice
                             )
                         },
                         label = {
@@ -157,13 +161,12 @@ fun ShoppingScreen(shoppingViewModel: ShoppingViewModel = viewModel(factory = Sh
 
         val context = LocalContext.current
         val token = UserInfoManager.getInstance(context).getToken()!!
-        val products = shoppingViewModel.filteredProducts.observeAsState()
 
         LaunchedEffect(key1 = true) {
-            shoppingViewModel.getProducts(token)
+            getProducts(token)
         }
 
-        ProductsList(products = products.value ?: emptyList())
+        ProductsList(products = products ?: emptyList())
     }
 }
 
@@ -311,7 +314,10 @@ fun ProductItem(product: Product) {
                         modifier = Modifier
                             .padding(8.dp)
                             .height(IntrinsicSize.Min) // Optional: Ensure the button height is not too tall
-                            .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(8.dp)) // Adjust the corner radius as needed
+                            .background(
+                                MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(8.dp)
+                            ) // Adjust the corner radius as needed
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,

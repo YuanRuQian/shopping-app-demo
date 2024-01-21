@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.ShoppingApplication
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.CartItemEntity
+import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.WishlistItemEntity
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.repository.CartWishlistManagementRepository
 import yuan.lydia.shoppingappdemo.network.cart.Order
 import yuan.lydia.shoppingappdemo.network.cart.OrderRequest
@@ -20,11 +21,37 @@ class CartWishlistManagementViewModel(private val cartWishlistManagementReposito
     private val _userCartLiveData = MutableLiveData<List<CartItemEntity>>()
     val userCartLiveData: LiveData<List<CartItemEntity>> get() = _userCartLiveData
 
+    private val _userWishlistLiveData = MutableLiveData<List<WishlistItemEntity>>()
+
+    val userWishlistLiveData: LiveData<List<WishlistItemEntity>> get() = _userWishlistLiveData
+
     fun loadUserCartData(username: String) {
         viewModelScope.launch {
             cartWishlistManagementRepository.loadUserCartData(username).collect {
                 _userCartLiveData.value = it
             }
+        }
+    }
+
+    fun loadWishlistData(username: String) {
+        viewModelScope.launch {
+            cartWishlistManagementRepository.loadUserWishlistData(username).collect {
+                _userWishlistLiveData.value = it
+            }
+        }
+    }
+
+    fun addToWishlistAndReloadWishlistData(username: String, productId: Long) {
+        viewModelScope.launch {
+            cartWishlistManagementRepository.addToWishlist(username, productId)
+            loadWishlistData(username)
+        }
+    }
+
+    fun removeFromWishlistAndReloadWishlistData(username: String, productId: Long) {
+        viewModelScope.launch {
+            cartWishlistManagementRepository.removeFromWishlist(username, productId)
+            loadWishlistData(username)
         }
     }
 

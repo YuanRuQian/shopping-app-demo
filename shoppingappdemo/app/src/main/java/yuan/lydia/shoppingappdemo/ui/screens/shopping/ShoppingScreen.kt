@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +20,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.HeartBroken
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
@@ -50,6 +53,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
+import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.WishlistItemEntity
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
 
@@ -60,12 +64,25 @@ fun ShoppingScreen(
     getProducts: (String) -> Unit,
     productsLiveData: LiveData<List<Product>>,
     increaseQuantity: (String, Long, Int) -> Unit,
-    showSnackbarMessage: (String) -> Unit
+    showSnackbarMessage: (String) -> Unit,
+    addToWishList: (String, Long) -> Unit,
+    removeFromWishList: (String, Long) -> Unit,
+    loadWishList: (String) -> Unit,
+    wishListLiveData: LiveData<List<WishlistItemEntity>>,
 ) {
     var maxPrice: Int? by remember { mutableStateOf(null) }
     var expanded by remember { mutableStateOf(false) }
     var selectedFilteredType by remember { mutableStateOf(FilterType.NONE) }
     val products by productsLiveData.observeAsState()
+    val wishList by wishListLiveData.observeAsState()
+
+    fun ifProductIsInWishlist(productId: Long): Boolean {
+        if (wishList.isNullOrEmpty()) {
+            return false
+        }
+
+        return wishList!!.find { it.productId == productId } != null
+    }
 
     Column(
         modifier = Modifier
@@ -162,15 +179,20 @@ fun ShoppingScreen(
 
         val context = LocalContext.current
         val token = UserInfoManager.getInstance(context).getToken()!!
+        val username = UserInfoManager.getInstance(context).getUsername()!!
 
         LaunchedEffect(key1 = true) {
             getProducts(token)
+            loadWishList(username)
         }
 
         ProductsList(
             products = products ?: emptyList(),
             increaseQuantity = increaseQuantity,
-            showSnackbarMessage = showSnackbarMessage
+            showSnackbarMessage = showSnackbarMessage,
+            addToWishList = addToWishList,
+            removeFromWishList = removeFromWishList,
+            ifProductIsInWishlist = { ifProductIsInWishlist(it) }
         )
     }
 }
@@ -179,7 +201,10 @@ fun ShoppingScreen(
 fun ProductsList(
     products: List<Product>,
     increaseQuantity: (String, Long, Int) -> Unit,
-    showSnackbarMessage: (String) -> Unit
+    showSnackbarMessage: (String) -> Unit,
+    addToWishList: (String, Long) -> Unit,
+    removeFromWishList: (String, Long) -> Unit,
+    ifProductIsInWishlist: (Long) -> Boolean
 ) {
     if (products.isEmpty()) {
         Text(text = "No products found")
@@ -189,7 +214,10 @@ fun ProductsList(
             ProductItem(
                 product = product,
                 increaseQuantity = increaseQuantity,
-                showSnackbarMessage = showSnackbarMessage
+                showSnackbarMessage = showSnackbarMessage,
+                addToWishList = addToWishList,
+                removeFromWishList = removeFromWishList,
+                ifProductIsInWishlist = ifProductIsInWishlist
             )
         }
     }
@@ -211,7 +239,10 @@ enum class FilterType(val readableText: String) {
 fun ProductItem(
     product: Product,
     increaseQuantity: (String, Long, Int) -> Unit,
-    showSnackbarMessage: (String) -> Unit
+    showSnackbarMessage: (String) -> Unit,
+    addToWishList: (String, Long) -> Unit,
+    removeFromWishList: (String, Long) -> Unit,
+    ifProductIsInWishlist: (Long) -> Boolean
 ) {
     var expanded by remember { mutableStateOf(false) }
     val (selectedQuantity, setSelectedQuantity) = remember { mutableIntStateOf(1) }
@@ -235,7 +266,7 @@ fun ProductItem(
             ) {
                 Column(
                     modifier = Modifier
-                        .weight(0.618f) // Fluid left column
+                        .weight(0.6f) // Fluid left column
                         .padding(16.dp)
                 ) {
                     Text(
@@ -322,7 +353,7 @@ fun ProductItem(
                 // Right column with Add to Cart button
                 Column(
                     modifier = Modifier
-                        .weight(0.382f)
+                        .weight(0.4f)
                         .padding(horizontal = 16.dp)
                 ) {
                     AddToCartButton(
@@ -332,6 +363,16 @@ fun ProductItem(
                         username = username,
                         setSelectedQuantity = setSelectedQuantity,
                         selectedQuantity = selectedQuantity
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    WishlistButton(
+                        productname = product.name,
+                        isInWishlist = ifProductIsInWishlist(product.id),
+                        addToWishList = addToWishList,
+                        removeFromWishList = removeFromWishList,
+                        username = username,
+                        productId = product.id,
+                        showSnackbarMessage = showSnackbarMessage
                     )
                 }
             }
@@ -379,6 +420,53 @@ fun AddToCartButton(
             )
             Text(
                 text = "Add to Cart",
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+fun WishlistButton(
+    productname: String,
+    isInWishlist: Boolean,
+    addToWishList: (String, Long) -> Unit,
+    removeFromWishList: (String, Long) -> Unit,
+    username: String,
+    productId: Long,
+    showSnackbarMessage: (String) -> Unit
+) {
+    Button(
+        onClick = {
+            // TODO: wishlist operation
+            if (isInWishlist) {
+                removeFromWishList(username, productId)
+                showSnackbarMessage("Removed $productname from Wishlist!")
+            } else {
+                addToWishList(username, productId)
+                showSnackbarMessage("Added $productname to Wishlist!")
+            }
+        },
+        modifier = Modifier
+            .padding(8.dp)
+            .height(IntrinsicSize.Min) // Optional: Ensure the button height is not too tall
+            .background(
+                MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(8.dp)
+            ) // Adjust the corner radius as needed
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth() // Center the entire column horizontally
+        ) {
+            Icon(
+                imageVector = if (isInWishlist) Icons.Default.HeartBroken else Icons.Default.Favorite,
+                contentDescription = null, // Content description can be null if the icon is decorative
+                modifier = Modifier.size(24.dp) // Optional: Adjust size as needed
+            )
+            Text(
+                text = if (isInWishlist) "Remove from Wishlist" else "Add to Wishlist",
                 textAlign = TextAlign.Center
             )
         }

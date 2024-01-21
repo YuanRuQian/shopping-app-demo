@@ -199,7 +199,23 @@ fun AppCanvas(
                         },
                         showSnackbarMessage = { message ->
                             snackbarViewModel.showSnackbar(message)
-                        }
+                        },
+                        addToWishList = { username, productId ->
+                            cartWishlistManagementViewModel.addToWishlistAndReloadWishlistData(
+                                username,
+                                productId
+                            )
+                        },
+                        removeFromWishList = { username, productId ->
+                            cartWishlistManagementViewModel.removeFromWishlistAndReloadWishlistData(
+                                username,
+                                productId
+                            )
+                        },
+                        loadWishList = { username ->
+                            cartWishlistManagementViewModel.loadWishlistData(username)
+                        },
+                        wishListLiveData = cartWishlistManagementViewModel.userWishlistLiveData
                     )
                 }
 

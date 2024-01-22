@@ -135,6 +135,7 @@ fun LoginScreen(
         }
 
         ClickableText(
+            modifier = Modifier.testTag("registerText"),
             text = AnnotatedString("Don't have an account? Click to register"),
             onClick = {
                 Log.d("LoginScreen", "navigate from login to register")

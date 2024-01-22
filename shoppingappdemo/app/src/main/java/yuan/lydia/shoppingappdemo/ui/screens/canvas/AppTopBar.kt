@@ -1,6 +1,7 @@
 package yuan.lydia.shoppingappdemo.ui.screens.canvas
 
 import android.content.Context
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -13,9 +14,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
+import java.lang.reflect.Modifier
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,11 +38,9 @@ fun AppTopBar(
         title = {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val destination = navBackStackEntry?.destination?.route
-            if (!isUserLoggedIn) {
-                Text("Shopping App Demo by Lydia Yuan")
-            } else {
-                Text(text = getRouteDisplayName(destination))
-            }
+            Text(
+                text = if (isUserLoggedIn) getRouteDisplayName(destination) else "Shopping App Demo by Lydia Yuan"
+            )
         },
         actions = {
             ExitButton(

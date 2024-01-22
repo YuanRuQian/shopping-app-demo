@@ -15,7 +15,7 @@ abstract class CartDatabase : RoomDatabase() {
 
         fun getDatabase(context: Context): CartDatabase {
             return Instance ?: synchronized(this) {
-                Room.databaseBuilder(context, CartDatabase::class.java, "cart_wishlist_database")
+                Room.databaseBuilder(context, CartDatabase::class.java, "cart_database")
                     .build()
                     .also { Instance = it }
             }

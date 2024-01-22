@@ -20,8 +20,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.HeartBroken
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
@@ -54,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
 import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
+import yuan.lydia.shoppingappdemo.ui.common.WishlistButton
 import yuan.lydia.shoppingappdemo.network.wishlist.Product as WishlistProduct
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -248,8 +247,7 @@ fun ProductItem(
     val (selectedQuantity, setSelectedQuantity) = remember { mutableIntStateOf(1) }
 
     val context = LocalContext.current
-    val username = UserInfoManager.getInstance(context).getUsername()!!
-    val token = UserInfoManager.getInstance(context).getToken()!!
+    val username = UserInfoManager.getInstance(context).getUsername() ?: return
 
     ElevatedCard(
         modifier = Modifier
@@ -351,7 +349,6 @@ fun ProductItem(
                 }
 
 
-                // Right column with Add to Cart button
                 Column(
                     modifier = Modifier
                         .weight(0.4f)
@@ -367,8 +364,7 @@ fun ProductItem(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     WishlistButton(
-                        token = token,
-                        productname = product.name,
+                        productName = product.name,
                         isInWishlist = ifProductIsInWishlist(product.id),
                         addToWishList = addToWishList,
                         removeFromWishList = removeFromWishList,
@@ -421,68 +417,6 @@ fun AddToCartButton(
             )
             Text(
                 text = "Add to Cart",
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-@Composable
-fun WishlistButton(
-    token: String,
-    productname: String,
-    isInWishlist: Boolean,
-    addToWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
-    removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
-    productId: Long,
-    showSnackbarMessage: (String) -> Unit
-) {
-    Button(
-        onClick = {
-            if (isInWishlist) {
-                removeFromWishList(
-                    token,
-                    productId,
-                    {
-                        showSnackbarMessage("Removed $productname from wishlist!")
-                    },
-                    {
-                        showSnackbarMessage(it)
-                    }
-                )
-            } else {
-                addToWishList(
-                    token,
-                    productId,
-                    {
-                        showSnackbarMessage("Added $productname to wishlist!")
-                    },
-                    {
-                        showSnackbarMessage(it)
-                    }
-                )
-            }
-        },
-        modifier = Modifier
-            .padding(8.dp)
-            .height(IntrinsicSize.Min) // Optional: Ensure the button height is not too tall
-            .background(
-                MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(8.dp)
-            ) // Adjust the corner radius as needed
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth() // Center the entire column horizontally
-        ) {
-            Icon(
-                imageVector = if (isInWishlist) Icons.Default.HeartBroken else Icons.Default.Favorite,
-                contentDescription = null, // Content description can be null if the icon is decorative
-                modifier = Modifier.size(24.dp) // Optional: Adjust size as needed
-            )
-            Text(
-                text = if (isInWishlist) "Remove from Wishlist" else "Add to Wishlist",
                 textAlign = TextAlign.Center
             )
         }

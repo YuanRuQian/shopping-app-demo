@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.HeartBroken
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
@@ -32,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
 import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
+import yuan.lydia.shoppingappdemo.ui.common.WishlistButton
 import yuan.lydia.shoppingappdemo.network.wishlist.Product as WishlistProduct
 
 @Composable
@@ -185,38 +185,14 @@ fun RemoveWishlistButton(
     productId: Long,
     showSnackbarMessage: (String) -> Unit
 ) {
-    val token = UserInfoManager.getInstance(LocalContext.current).getToken()!!
-    Button(
-        onClick = {
-            removeFromWishList(token, productId, {
-                showSnackbarMessage("Removed $productname from Wishlist!")
-            }, showSnackbarMessage)
-            showSnackbarMessage("Removed $productname from Wishlist!")
-        },
-        modifier = Modifier
-            .padding(8.dp)
-            .height(IntrinsicSize.Min) // Optional: Ensure the button height is not too tall
-            .background(
-                MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(8.dp)
-            ) // Adjust the corner radius as needed
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth() // Center the entire column horizontally
-        ) {
-            Icon(
-                imageVector = Icons.Default.HeartBroken,
-                contentDescription = null, // Content description can be null if the icon is decorative
-                modifier = Modifier.size(24.dp) // Optional: Adjust size as needed
-            )
-            Text(
-                text = "Remove from Wishlist",
-                textAlign = TextAlign.Center
-            )
-        }
-    }
+    WishlistButton(
+        productName = productname,
+        isInWishlist = true,
+        addToWishList = { _, _, _, _ -> },
+        removeFromWishList = removeFromWishList,
+        productId = productId,
+        showSnackbarMessage = showSnackbarMessage
+    )
 }
 
 

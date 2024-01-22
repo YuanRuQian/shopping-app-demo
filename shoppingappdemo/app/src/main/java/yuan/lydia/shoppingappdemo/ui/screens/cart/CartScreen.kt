@@ -176,14 +176,17 @@ fun UserCart(
                 },
                 modifier = Modifier.padding(16.dp)
             ) {
-                Row {
-                    Text(text = "Checkout")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "Checkout", modifier = Modifier.padding(end = 8.dp))
                     Icon(
                         imageVector = Icons.Default.ShoppingCartCheckout,
                         contentDescription = "Checkout"
                     )
                 }
             }
+
         }
 
     }
@@ -231,23 +234,23 @@ fun CartItem(
                     Text(
                         text = productInfo.name,
                         modifier = Modifier
-                            .padding(16.dp)
+                            .padding(start = 16.dp, top = 16.dp, end = 16.dp)
                             .fillMaxWidth()
                     )
 
                     Text(
                         text = "Retail Price: $${productInfo.retailPrice}",
                         modifier = Modifier
-                            .padding(16.dp)
+                            .padding(horizontal = 16.dp)
                             .fillMaxWidth()
                     )
 
-                    Text(text = "Quantity: ", modifier = Modifier.padding(16.dp))
+                    Text(text = "Quantity: ", modifier = Modifier.padding(horizontal = 16.dp))
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(

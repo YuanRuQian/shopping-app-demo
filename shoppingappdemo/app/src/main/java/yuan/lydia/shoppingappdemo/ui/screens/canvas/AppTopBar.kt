@@ -96,5 +96,5 @@ fun logout(
         }
         launchSingleTop = true
     }
-    showSnackbarMessage("See you next time, $currentUsername!")
+    showSnackbarMessage("See you next time, $currentUsername! 🫡")
 }

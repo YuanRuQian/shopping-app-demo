@@ -16,11 +16,13 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -54,6 +56,7 @@ fun LoginScreen(
     var isLoginButtonEnabled by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
+    val uiState by userAuthViewModel.uiState.observeAsState()
 
     fun updateLoginButtonState() {
         isLoginButtonEnabled = username.isNotBlank() && password.isNotBlank()
@@ -128,28 +131,29 @@ fun LoginScreen(
         }
 
         ClickableText(
-            text = AnnotatedString("Don't have an account? Register here"),
+            text = AnnotatedString("Don't have an account? Click to register"),
             onClick = {
                 Log.d("LoginScreen", "navigate from login to register")
                 navigateToRegister()
-            }
+            },
+            style = MaterialTheme.typography.labelLarge
         )
 
-        when (val uiState = userAuthViewModel.uiState) {
+        when (val loginUiState = uiState ?: UiState.Uninitialized) {
             is UiState.LoginSuccess -> {
-                LaunchedEffect(uiState.response.status.message) {
+                LaunchedEffect(loginUiState.response.status.message) {
                     isLoginButtonEnabled = true
                     val userInfoManager = UserInfoManager.getInstance(context)
-                    userInfoManager.saveToken(uiState.response.token)
+                    userInfoManager.saveToken(loginUiState.response.token)
                     userInfoManager.saveUsername(username)
                     onLoginSuccess()
-                    showSnackBarMessage(uiState.response.status.message)
+                    showSnackBarMessage(loginUiState.response.status.message)
                 }
             }
 
             is UiState.LoginError -> {
-                LaunchedEffect(uiState.response.status.message) {
-                    showSnackBarMessage(uiState.response.status.message)
+                LaunchedEffect(loginUiState.response.status.message) {
+                    showSnackBarMessage(loginUiState.response.status.message)
                 }
                 isLoginButtonEnabled = true
             }
@@ -162,27 +166,25 @@ fun LoginScreen(
             }
 
             is UiState.RegisterError -> {
-                LaunchedEffect(uiState.response.message) {
-                    showSnackBarMessage(uiState.response.message)
+                LaunchedEffect(loginUiState.response.message) {
+                    showSnackBarMessage(loginUiState.response.message)
                 }
                 isLoginButtonEnabled = true
             }
 
             is UiState.RegisterNetworkError -> {
-                LaunchedEffect(uiState.message) {
-                    showSnackBarMessage(uiState.message)
+                LaunchedEffect(loginUiState.message) {
+                    showSnackBarMessage(loginUiState.message)
                 }
                 isLoginButtonEnabled = true
             }
 
             is UiState.LoginNetworkError -> {
-                LaunchedEffect(uiState.message) {
-                    showSnackBarMessage(uiState.message)
+                LaunchedEffect(loginUiState.message) {
+                    showSnackBarMessage(loginUiState.message)
                 }
                 isLoginButtonEnabled = true
             }
-
-            else -> {}
         }
     }
 }

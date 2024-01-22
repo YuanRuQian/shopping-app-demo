@@ -1,9 +1,8 @@
 package yuan.lydia.shoppingappdemo.data.userAuth
 
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -17,7 +16,6 @@ import yuan.lydia.shoppingappdemo.network.userAuth.RegisterRequest
 import yuan.lydia.shoppingappdemo.network.userAuth.RegisterResponse
 import yuan.lydia.shoppingappdemo.network.userAuth.UserAuthRepository
 
-// TODO: refactor this, no more UiState, use live data instead
 sealed interface UiState {
     data class LoginSuccess(val response: LoginResponse) : UiState
 
@@ -38,7 +36,9 @@ sealed interface UiState {
 class UserAuthViewModel(
     private val userAuthRepository: UserAuthRepository
 ) : ViewModel() {
-    var uiState: UiState by mutableStateOf(UiState.Uninitialized)
+    private val _uiState = MutableLiveData<UiState>(UiState.Uninitialized)
+    val uiState: LiveData<UiState>
+        get() = _uiState
 
 
     private suspend fun loginHelper(loginRequest: LoginRequest): UiState {
@@ -66,17 +66,17 @@ class UserAuthViewModel(
 
     fun login(username: String, password: String) {
         val loginRequest = LoginRequest(username, password)
-        uiState = UiState.Loading
+        _uiState.value = UiState.Loading
         viewModelScope.launch {
-            uiState = loginHelper(loginRequest)
+            _uiState.value = loginHelper(loginRequest)
         }
     }
 
     fun register(username: String, email: String, password: String) {
         val registerRequest = RegisterRequest(username, email, password)
-        uiState = UiState.Loading
+        _uiState.value = UiState.Loading
         viewModelScope.launch {
-             uiState = try {
+            _uiState.value = try {
                 val response = userAuthRepository.register(registerRequest)
                 if (response.success) {
                     Log.d("UserAuthViewModel", "register success: $response")

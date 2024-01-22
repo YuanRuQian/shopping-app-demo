@@ -17,11 +17,13 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,6 +57,7 @@ fun RegisterScreen(
     var isRegisterButtonEnabled by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
+    val uiState by userAuthViewModel.uiState.observeAsState()
 
     fun updateLoginButtonState() {
         isRegisterButtonEnabled =
@@ -152,28 +155,29 @@ fun RegisterScreen(
         }
 
         ClickableText(
-            text = AnnotatedString("Already have an account? Login here"),
+            text = AnnotatedString("Already have an account? Click to login"),
             onClick = {
                 Log.d("RegisterScreen", "navigate from register to login")
                 navigateToLogin()
-            }
+            },
+            style = MaterialTheme.typography.labelLarge
         )
 
-        when (val uiState = userAuthViewModel.uiState) {
+        when (val registerUiState = uiState?: UiState.Uninitialized) {
             is UiState.LoginSuccess -> {
-                LaunchedEffect(uiState.response.status.message) {
+                LaunchedEffect(registerUiState.response.status.message) {
                     isRegisterButtonEnabled = true
                     val userInfoManager = UserInfoManager.getInstance(context)
-                    userInfoManager.saveToken(uiState.response.token)
+                    userInfoManager.saveToken(registerUiState.response.token)
                     userInfoManager.saveUsername(username)
                     onLoginSuccess()
-                    showSnackBarMessage(uiState.response.status.message)
+                    showSnackBarMessage(registerUiState.response.status.message)
                 }
             }
 
             is UiState.LoginError -> {
-                LaunchedEffect(uiState.response.status.message) {
-                    showSnackBarMessage(uiState.response.status.message)
+                LaunchedEffect(registerUiState.response.status.message) {
+                    showSnackBarMessage(registerUiState.response.status.message)
                 }
                 isRegisterButtonEnabled = true
             }
@@ -186,27 +190,25 @@ fun RegisterScreen(
             }
 
             is UiState.RegisterError -> {
-                LaunchedEffect(uiState.response.message) {
-                    showSnackBarMessage(uiState.response.message)
+                LaunchedEffect(registerUiState.response.message) {
+                    showSnackBarMessage(registerUiState.response.message)
                 }
                 isRegisterButtonEnabled = true
             }
 
             is UiState.RegisterNetworkError -> {
-                LaunchedEffect(uiState.message) {
-                    showSnackBarMessage(uiState.message)
+                LaunchedEffect(registerUiState.message) {
+                    showSnackBarMessage(registerUiState.message)
                 }
                 isRegisterButtonEnabled = true
             }
 
             is UiState.LoginNetworkError -> {
-                LaunchedEffect(uiState.message) {
-                    showSnackBarMessage(uiState.message)
+                LaunchedEffect(registerUiState.message) {
+                    showSnackBarMessage(registerUiState.message)
                 }
                 isRegisterButtonEnabled = true
             }
-
-            else -> {}
         }
     }
 }

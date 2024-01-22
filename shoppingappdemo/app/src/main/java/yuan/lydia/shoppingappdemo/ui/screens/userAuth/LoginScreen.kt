@@ -45,9 +45,9 @@ import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     navigateToRegister: () -> Unit,
-    showSnackBarMessage: (String) -> Unit
+    showSnackBarMessage: (String) -> Unit,
+    userAuthViewModel: UserAuthViewModel = viewModel(factory = UserAuthViewModel.Factory)
 ) {
-    val userAuthViewModel: UserAuthViewModel = viewModel(factory = UserAuthViewModel.Factory)
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }

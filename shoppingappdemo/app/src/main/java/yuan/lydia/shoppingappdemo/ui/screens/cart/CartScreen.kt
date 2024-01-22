@@ -46,7 +46,7 @@ import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
 import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
 
-
+// TODO: the last card should not overlay with the sticky check out footer
 @Composable
 fun CartScreen(
     loadProductsData: (String) -> Unit,

@@ -1,46 +1,23 @@
-package yuan.lydia.shoppingappdemo.ui.screens
+package yuan.lydia.shoppingappdemo.ui.screens.canvas
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingBasket
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.CartWishlistManagementViewModel
@@ -55,19 +32,6 @@ import yuan.lydia.shoppingappdemo.ui.screens.shopping.ShoppingScreen
 import yuan.lydia.shoppingappdemo.ui.screens.userAuth.LoginScreen
 import yuan.lydia.shoppingappdemo.ui.screens.userAuth.RegisterScreen
 import yuan.lydia.shoppingappdemo.ui.screens.whishlist.WishlistScreen
-
-sealed class AppRoute(val route: String) {
-    data object Login : AppRoute("Login")
-    data object Register : AppRoute("Register")
-    data object Shopping : AppRoute("Shopping")
-
-    data object Cart : AppRoute("Cart")
-    data object History : AppRoute("History")
-    data object Wishlist : AppRoute("Wishlist")
-
-    data object OrderDetails : AppRoute("Order Details")
-}
-
 
 @Composable
 fun AppCanvas(
@@ -238,186 +202,4 @@ fun AppCanvas(
             }
         }
     }
-}
-
-fun logout(
-    context: Context,
-    navController: NavController,
-    showSnackbarMessage: (String) -> Unit,
-    setIsUserLoggedIn: (Boolean) -> Unit
-) {
-    val userInfoManager = UserInfoManager.getInstance(context)
-    userInfoManager.clearToken()
-    val currentUsername = userInfoManager.getUsername()
-    userInfoManager.clearUsername()
-    setIsUserLoggedIn(false)
-    navController.navigate(AppRoute.Login.route) {
-        popUpTo(navController.graph.startDestinationId) {
-            inclusive = true
-        }
-        launchSingleTop = true
-    }
-    showSnackbarMessage("See you next time, $currentUsername!")
-}
-
-@Composable
-fun BottomNavigationBarButton(icon: ImageVector, text: String, onClick: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        IconButton(onClick = { onClick() }) {
-            Icon(
-                icon,
-                contentDescription = text
-            )
-        }
-        Text(text)
-    }
-}
-
-fun navigationWithDestinationPreCheck(
-    navController: NavController,
-    destination: String,
-    navBackStackEntry: NavBackStackEntry?
-) {
-    if (navBackStackEntry?.destination?.route != destination) {
-        navController.navigate(destination)
-    }
-}
-
-@Composable
-fun BottomNavigationBar(navController: NavController, isUserLoggedIn: Boolean) {
-    if (!isUserLoggedIn) {
-        return
-    }
-
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-
-    BottomAppBar {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            BottomNavigationBarButton(
-                icon = Icons.Filled.Search,
-                text = AppRoute.Shopping.route,
-                onClick = {
-                    navigationWithDestinationPreCheck(
-                        navController,
-                        AppRoute.Shopping.route,
-                        navBackStackEntry
-                    )
-                }
-            )
-            BottomNavigationBarButton(
-                icon = Icons.Filled.ShoppingBasket,
-                text = AppRoute.Cart.route,
-                onClick = {
-                    navigationWithDestinationPreCheck(
-                        navController,
-                        AppRoute.Cart.route,
-                        navBackStackEntry
-                    )
-                }
-            )
-            BottomNavigationBarButton(
-                icon = Icons.Filled.History,
-                text = AppRoute.History.route,
-                onClick = {
-                    navigationWithDestinationPreCheck(
-                        navController,
-                        AppRoute.History.route,
-                        navBackStackEntry
-                    )
-                }
-            )
-            BottomNavigationBarButton(
-                icon = Icons.Filled.Favorite,
-                text = AppRoute.Wishlist.route,
-                onClick = {
-                    navigationWithDestinationPreCheck(
-                        navController,
-                        AppRoute.Wishlist.route,
-                        navBackStackEntry
-                    )
-                }
-            )
-        }
-    }
-}
-
-
-@Composable
-fun ExitButton(
-    isUserLoggedIn: Boolean,
-    context: Context,
-    navController: NavController,
-    showSnackbarMessage: (String) -> Unit,
-    setIsUserLoggedIn: (Boolean) -> Unit
-) {
-    if (isUserLoggedIn) {
-        IconButton(onClick = {
-            logout(
-                context,
-                navController,
-                showSnackbarMessage,
-                setIsUserLoggedIn
-            )
-        }) {
-            Icon(
-                imageVector = Icons.Filled.ExitToApp,
-                contentDescription = "Log out and exit the app"
-            )
-        }
-    }
-}
-
-fun getRouteDisplayName(route: String?): String {
-    if (route == null) {
-        return "Shopping App Demo by Lydia Yuan"
-    }
-    val routeSegments = route.split("/")
-    return if (routeSegments.isNotEmpty()) {
-        routeSegments[0]
-    } else {
-        route
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AppTopBar(
-    navController: NavController,
-    isUserLoggedIn: Boolean,
-    showSnackbarMessage: (String) -> Unit,
-    setIsUserLoggedIn: (Boolean) -> Unit
-) {
-    val context = LocalContext.current
-    TopAppBar(
-        colors = topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.primary,
-        ),
-        title = {
-            val navBackStackEntry by navController.currentBackStackEntryAsState()
-            val destination = navBackStackEntry?.destination?.route
-            if (!isUserLoggedIn) {
-                Text("Shopping App Demo by Lydia Yuan")
-            } else {
-                Text(text = getRouteDisplayName(destination))
-            }
-        },
-        actions = {
-            ExitButton(
-                isUserLoggedIn,
-                context,
-                navController,
-                showSnackbarMessage,
-                setIsUserLoggedIn
-            )
-        },
-    )
 }

@@ -17,6 +17,7 @@ import yuan.lydia.shoppingappdemo.network.userAuth.RegisterRequest
 import yuan.lydia.shoppingappdemo.network.userAuth.RegisterResponse
 import yuan.lydia.shoppingappdemo.network.userAuth.UserAuthRepository
 
+// TODO: refactor this, no more UiState, use live data instead
 sealed interface UiState {
     data class LoginSuccess(val response: LoginResponse) : UiState
 

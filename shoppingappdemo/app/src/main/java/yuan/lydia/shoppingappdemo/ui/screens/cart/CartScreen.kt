@@ -54,7 +54,7 @@ fun CartScreen(
     userCartDataLiveData: LiveData<List<CartItemEntity>>,
     updateQuantity: (String, Long, Int) -> Unit,
     showSnackbarMessage: (String) -> Unit,
-    checkout: (String, List<CartItemEntity>) -> Unit,
+    checkout: (String, List<CartItemEntity>) -> Boolean,
     onCheckoutSuccess: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -136,7 +136,7 @@ fun UserCart(
     getProductDataByProductId: (Long) -> Product?,
     token: String,
     username: String,
-    checkout: (String, List<CartItemEntity>) -> Unit,
+    checkout: (String, List<CartItemEntity>) -> Boolean,
     onCheckoutSuccess: (String) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -171,8 +171,12 @@ fun UserCart(
             )
             Button(
                 onClick = {
-                    checkout(token, userCartData)
-                    onCheckoutSuccess(username)
+                    val isSuccessful = checkout(token, userCartData)
+                    if (isSuccessful) {
+                        onCheckoutSuccess(username)
+                    } else {
+                        showSnackbarMessage("Some of the products in your cart are out of stock, please remove them and try again")
+                    }
                 },
                 modifier = Modifier.padding(16.dp)
             ) {

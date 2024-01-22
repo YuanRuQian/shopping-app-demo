@@ -1,5 +1,6 @@
 package yuan.lydia.shoppingappdemo.data.cartWishlistManagement
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -87,12 +88,24 @@ class CartWishlistManagementViewModel(private val cartWishlistManagementReposito
     }
 
 
-    fun checkout(token: String, cartItems: List<CartItemEntity>) {
+    fun checkout(token: String, cartItems: List<CartItemEntity>): Boolean {
         val orderRequest = mapCartItemEntitiesToOrderRequest(cartItems)
+        var isSuccessful = false
         viewModelScope.launch {
-            cartWishlistManagementRepository.submitOrder(token, orderRequest)
-            // TODO: handle error and show success message if success
+            try {
+                val orderResponse = cartWishlistManagementRepository.submitOrder(token, orderRequest)
+                // TODO: handle error and show success message if success
+                if(orderResponse.success) {
+                    isSuccessful = true
+                    Log.d("CartWishlistManagementViewModel", "checkout success")
+                } else {
+                    Log.d("CartWishlistManagementViewModel", "checkout failed: ${orderResponse.message}")
+                }
+            } catch (e: retrofit2.HttpException) {
+                Log.e("CartWishlistManagementViewModel", "checkout error: ${e.message()}")
+            }
         }
+        return isSuccessful
     }
 
     fun clearUserCartAndReloadUserCartData(username: String) {

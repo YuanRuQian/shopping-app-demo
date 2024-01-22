@@ -20,7 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
-import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.CartWishlistManagementViewModel
+import yuan.lydia.shoppingappdemo.data.cart.CartManagementViewModel
 import yuan.lydia.shoppingappdemo.data.history.HistoryViewModel
 import yuan.lydia.shoppingappdemo.data.shopping.ShoppingViewModel
 import yuan.lydia.shoppingappdemo.data.utils.SnackbarViewModel
@@ -37,8 +37,8 @@ import yuan.lydia.shoppingappdemo.ui.screens.whishlist.WishlistScreen
 @Composable
 fun AppCanvas(
     snackbarViewModel: SnackbarViewModel = viewModel(factory = SnackbarViewModel.Factory),
-    cartWishlistManagementViewModel: CartWishlistManagementViewModel = viewModel(
-        factory = CartWishlistManagementViewModel.Factory
+    cartManagementViewModel: CartManagementViewModel = viewModel(
+        factory = CartManagementViewModel.Factory
     ),
     shoppingViewModel: ShoppingViewModel = viewModel(factory = ShoppingViewModel.Factory)
 ) {
@@ -131,12 +131,12 @@ fun AppCanvas(
                             shoppingViewModel.getProducts(it)
                         },
                         productsLiveData = shoppingViewModel.filteredProducts,
-                        increaseQuantity = cartWishlistManagementViewModel::increaseQuantityThenReloadUserCartData,
+                        increaseQuantity = cartManagementViewModel::increaseQuantityThenReloadUserCartData,
                         showSnackbarMessage = snackbarViewModel::showSnackbar,
-                        addToWishList = cartWishlistManagementViewModel::addToWishlistAndReloadWishlistData,
-                        removeFromWishList = cartWishlistManagementViewModel::removeFromWishlistAndReloadWishlistData,
-                        loadWishList = cartWishlistManagementViewModel::loadWishlistData,
-                        wishListLiveData = cartWishlistManagementViewModel.userWishlistLiveData
+                        addToWishList = cartManagementViewModel::addToWishlistAndReloadWishlistData,
+                        removeFromWishList = cartManagementViewModel::removeFromWishlistAndReloadWishlistData,
+                        loadWishList = cartManagementViewModel::loadWishlistData,
+                        wishListLiveData = cartManagementViewModel.userWishlistLiveData
                     )
                 }
 
@@ -146,14 +146,14 @@ fun AppCanvas(
                             shoppingViewModel.getProducts(token)
                         },
                         productsLiveData = shoppingViewModel.filteredProducts,
-                        loadUserCartData = cartWishlistManagementViewModel::loadUserCartData,
-                        userCartDataLiveData = cartWishlistManagementViewModel.userCartLiveData,
-                        updateQuantity = cartWishlistManagementViewModel::updateQuantityThenReloadUserCartData,
+                        loadUserCartData = cartManagementViewModel::loadUserCartData,
+                        userCartDataLiveData = cartManagementViewModel.userCartLiveData,
+                        updateQuantity = cartManagementViewModel::updateQuantityThenReloadUserCartData,
                         showSnackbarMessage = snackbarViewModel::showSnackbar,
-                        checkout = cartWishlistManagementViewModel::checkout,
-                        checkoutSuccessLiveData = cartWishlistManagementViewModel.checkoutSuccess,
+                        checkout = cartManagementViewModel::checkout,
+                        checkoutSuccessLiveData = cartManagementViewModel.checkoutSuccess,
                         onCheckoutSuccess = { username ->
-                            cartWishlistManagementViewModel.clearUserCartAndReloadUserCartData(
+                            cartManagementViewModel.clearUserCartAndReloadUserCartData(
                                 username
                             )
                             navController.navigate(AppRoute.Shopping.route) {
@@ -176,13 +176,13 @@ fun AppCanvas(
 
                 composable(AppRoute.Wishlist.route) {
                     WishlistScreen(
-                        loadWishlistData = cartWishlistManagementViewModel::loadWishlistData,
-                        wishlistLiveData = cartWishlistManagementViewModel.userWishlistLiveData,
+                        loadWishlistData = cartManagementViewModel::loadWishlistData,
+                        wishlistLiveData = cartManagementViewModel.userWishlistLiveData,
                         loadProductsData = shoppingViewModel::getProducts,
                         productsLiveData = shoppingViewModel.filteredProducts,
-                        removeFromWishList = cartWishlistManagementViewModel::removeFromWishlistAndReloadWishlistData,
+                        removeFromWishList = cartManagementViewModel::removeFromWishlistAndReloadWishlistData,
                         showSnackbarMessage = snackbarViewModel::showSnackbar,
-                        addToCart = cartWishlistManagementViewModel::addToCart
+                        addToCart = cartManagementViewModel::addToCart
                     )
                 }
 

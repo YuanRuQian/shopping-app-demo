@@ -6,9 +6,9 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.database.CartWishlistManagementDatabase
-import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.repository.CartWishlistManagementRepository
-import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.repository.OfflineCartWishlistManagementRepository
+import yuan.lydia.shoppingappdemo.data.cart.database.CartManagementDatabase
+import yuan.lydia.shoppingappdemo.data.cart.repository.CartManagementRepository
+import yuan.lydia.shoppingappdemo.data.cart.repository.OfflineCartManagementRepository
 import yuan.lydia.shoppingappdemo.network.cart.CartApiServices
 import yuan.lydia.shoppingappdemo.network.history.HistoryApiServices
 import yuan.lydia.shoppingappdemo.network.history.HistoryRepository
@@ -26,7 +26,7 @@ interface AppContainer {
     val userAuthRepository: UserAuthRepository
     val shoppingRepository: ShoppingRepository
     val historyRepository: HistoryRepository
-    val cartWishlistManagementRepository: CartWishlistManagementRepository
+    val cartManagementRepository: CartManagementRepository
 }
 
 class DefaultAppContainer(private val context: Context) : AppContainer {
@@ -41,10 +41,9 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
         NetworkHistoryRepository(historyService)
     }
 
-    override val cartWishlistManagementRepository: CartWishlistManagementRepository by lazy {
-        OfflineCartWishlistManagementRepository(
-            CartWishlistManagementDatabase.getDatabase(context).cartItemDao(),
-            CartWishlistManagementDatabase.getDatabase(context).wishlistItemDao(),
+    override val cartManagementRepository: CartManagementRepository by lazy {
+        OfflineCartManagementRepository(
+            CartManagementDatabase.getDatabase(context).cartItemDao(),
             cartServices
         )
     }

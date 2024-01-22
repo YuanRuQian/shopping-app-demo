@@ -1,4 +1,4 @@
-package yuan.lydia.shoppingappdemo.data.cartWishlistManagement.database.entities
+package yuan.lydia.shoppingappdemo.data.cart.database
 
 import androidx.room.Entity
 

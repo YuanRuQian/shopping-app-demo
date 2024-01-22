@@ -1,4 +1,4 @@
-package yuan.lydia.shoppingappdemo.data.cartWishlistManagement.database.daos
+package yuan.lydia.shoppingappdemo.data.cart.database
 
 
 import androidx.room.Dao
@@ -7,7 +7,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
-import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.database.entities.CartItemEntity
 
 @Dao
 interface CartItemDao {

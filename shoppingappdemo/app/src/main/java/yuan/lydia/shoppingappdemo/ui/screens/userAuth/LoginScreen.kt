@@ -31,6 +31,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.KeyboardType.Companion.Password
@@ -71,6 +72,7 @@ fun LoginScreen(
     ) {
         // Username TextField
         TextField(
+            modifier = Modifier.testTag("username"),
             value = username,
             onValueChange = {
                 username = it
@@ -90,6 +92,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.padding(16.dp))
 
         TextField(
+            modifier = Modifier.testTag("password"),
             value = password,
             onValueChange = {
                 password = it
@@ -126,6 +129,7 @@ fun LoginScreen(
             enabled = isLoginButtonEnabled,
             modifier = Modifier
                 .padding(bottom = 16.dp)
+                .testTag("loginButton"),
         ) {
             Text(text = "Login")
         }

@@ -33,7 +33,7 @@ sealed interface UiState {
     data object Loading : UiState
 }
 
-class UserAuthViewModel(
+open class UserAuthViewModel(
     private val userAuthRepository: UserAuthRepository
 ) : ViewModel() {
     private val _uiState = MutableLiveData<UiState>(UiState.Uninitialized)

@@ -438,7 +438,6 @@ fun WishlistButton(
 ) {
     Button(
         onClick = {
-            // TODO: wishlist operation
             if (isInWishlist) {
                 removeFromWishList(username, productId)
                 showSnackbarMessage("Removed $productname from Wishlist!")

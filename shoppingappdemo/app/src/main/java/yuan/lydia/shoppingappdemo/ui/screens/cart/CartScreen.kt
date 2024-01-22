@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -175,7 +176,13 @@ fun UserCart(
                 },
                 modifier = Modifier.padding(16.dp)
             ) {
-                Text(text = "Checkout")
+                Row {
+                    Text(text = "Checkout")
+                    Icon(
+                        imageVector = Icons.Default.ShoppingCartCheckout,
+                        contentDescription = "Checkout"
+                    )
+                }
             }
         }
 

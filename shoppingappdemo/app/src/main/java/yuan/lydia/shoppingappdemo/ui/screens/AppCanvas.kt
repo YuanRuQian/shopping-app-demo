@@ -267,7 +267,31 @@ fun AppCanvas(
                 }
 
                 composable(AppRoute.Wishlist.route) {
-                    WishlistScreen()
+                    WishlistScreen(
+                        loadWishlistData = { username ->
+                            cartWishlistManagementViewModel.loadWishlistData(username)
+                        },
+                        wishlistLiveData = cartWishlistManagementViewModel.userWishlistLiveData,
+                        loadProductsData = { token ->
+                            shoppingViewModel.getProducts(token)
+                        },
+                        productsLiveData = shoppingViewModel.filteredProducts,
+                        removeFromWishList = { username, productId ->
+                            cartWishlistManagementViewModel.removeFromWishlistAndReloadWishlistData(
+                                username,
+                                productId
+                            )
+                        },
+                        showSnackbarMessage = { message ->
+                            snackbarViewModel.showSnackbar(message)
+                        },
+                        addToCart = { username, productId ->
+                            cartWishlistManagementViewModel.addToCart(
+                                username,
+                                productId
+                            )
+                        }
+                    )
                 }
 
                 composable("${AppRoute.OrderDetails.route}/{orderId}") { backStackEntry ->

@@ -10,8 +10,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.ShoppingApplication
-import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.CartItemEntity
-import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.WishlistItemEntity
+import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.database.entities.CartItemEntity
+import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.database.entities.WishlistItemEntity
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.repository.CartWishlistManagementRepository
 import yuan.lydia.shoppingappdemo.network.cart.Order
 import yuan.lydia.shoppingappdemo.network.cart.OrderRequest

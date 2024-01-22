@@ -6,7 +6,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.CartWishlistManagementDatabase
+import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.database.CartWishlistManagementDatabase
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.repository.CartWishlistManagementRepository
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.repository.OfflineCartWishlistManagementRepository
 import yuan.lydia.shoppingappdemo.network.cart.CartApiServices

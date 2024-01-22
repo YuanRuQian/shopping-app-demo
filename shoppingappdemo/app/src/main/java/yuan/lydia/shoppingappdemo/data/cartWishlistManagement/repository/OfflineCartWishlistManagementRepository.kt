@@ -1,10 +1,10 @@
 package yuan.lydia.shoppingappdemo.data.cartWishlistManagement.repository
 
 import kotlinx.coroutines.flow.Flow
-import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.daos.CartItemDao
-import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.daos.WishlistItemDao
-import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.CartItemEntity
-import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.WishlistItemEntity
+import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.database.daos.CartItemDao
+import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.database.daos.WishlistItemDao
+import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.database.entities.CartItemEntity
+import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.database.entities.WishlistItemEntity
 import yuan.lydia.shoppingappdemo.network.cart.CartApiServices
 import yuan.lydia.shoppingappdemo.network.cart.OrderRequest
 import yuan.lydia.shoppingappdemo.network.cart.OrderResponse

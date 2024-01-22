@@ -69,7 +69,6 @@ sealed class AppRoute(val route: String) {
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppCanvas(
     snackbarViewModel: SnackbarViewModel = viewModel(factory = SnackbarViewModel.Factory),
@@ -103,35 +102,15 @@ fun AppCanvas(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                colors = topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                title = {
-                    val navBackStackEntry by navController.currentBackStackEntryAsState()
-                    val destination = navBackStackEntry?.destination?.route
-                    if (!isUserLoggedIn) {
-                        Text("Shopping App Demo by Lydia Yuan")
-                    } else {
-                        Text(text = getRouteDisplayName(destination))
-                    }
-                },
-                actions = {
-                    ExitButton(
-                        isUserLoggedIn,
-                        context,
-                        navController,
-                        snackbarViewModel,
-                        setIsUserLoggedIn
-                    )
-                },
+            AppTopBar(
+                navController = navController,
+                isUserLoggedIn = isUserLoggedIn,
+                showSnackbarMessage = snackbarViewModel::showSnackbar,
+                setIsUserLoggedIn = setIsUserLoggedIn
             )
         },
         bottomBar = {
-            if (isUserLoggedIn) {
-                BottomNavigationBar(navController)
-            }
+            BottomNavigationBar(navController, isUserLoggedIn)
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -264,7 +243,7 @@ fun AppCanvas(
 fun logout(
     context: Context,
     navController: NavController,
-    snackbarViewModel: SnackbarViewModel,
+    showSnackbarMessage: (String) -> Unit,
     setIsUserLoggedIn: (Boolean) -> Unit
 ) {
     val userInfoManager = UserInfoManager.getInstance(context)
@@ -278,7 +257,7 @@ fun logout(
         }
         launchSingleTop = true
     }
-    snackbarViewModel.showSnackbar("See you next time, $currentUsername!")
+    showSnackbarMessage("See you next time, $currentUsername!")
 }
 
 @Composable
@@ -308,7 +287,11 @@ fun navigationWithDestinationPreCheck(
 }
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
+fun BottomNavigationBar(navController: NavController, isUserLoggedIn: Boolean) {
+    if (!isUserLoggedIn) {
+        return
+    }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     BottomAppBar {
@@ -372,7 +355,7 @@ fun ExitButton(
     isUserLoggedIn: Boolean,
     context: Context,
     navController: NavController,
-    snackbarViewModel: SnackbarViewModel,
+    showSnackbarMessage: (String) -> Unit,
     setIsUserLoggedIn: (Boolean) -> Unit
 ) {
     if (isUserLoggedIn) {
@@ -380,7 +363,7 @@ fun ExitButton(
             logout(
                 context,
                 navController,
-                snackbarViewModel,
+                showSnackbarMessage,
                 setIsUserLoggedIn
             )
         }) {
@@ -402,4 +385,39 @@ fun getRouteDisplayName(route: String?): String {
     } else {
         route
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppTopBar(
+    navController: NavController,
+    isUserLoggedIn: Boolean,
+    showSnackbarMessage: (String) -> Unit,
+    setIsUserLoggedIn: (Boolean) -> Unit
+) {
+    val context = LocalContext.current
+    TopAppBar(
+        colors = topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.primary,
+        ),
+        title = {
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val destination = navBackStackEntry?.destination?.route
+            if (!isUserLoggedIn) {
+                Text("Shopping App Demo by Lydia Yuan")
+            } else {
+                Text(text = getRouteDisplayName(destination))
+            }
+        },
+        actions = {
+            ExitButton(
+                isUserLoggedIn,
+                context,
+                navController,
+                showSnackbarMessage,
+                setIsUserLoggedIn
+            )
+        },
+    )
 }

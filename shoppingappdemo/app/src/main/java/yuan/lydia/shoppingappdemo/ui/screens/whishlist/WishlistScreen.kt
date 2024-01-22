@@ -35,6 +35,7 @@ import androidx.lifecycle.LiveData
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.WishlistItemEntity
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
+import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
 
 @Composable
 fun WishlistScreen(
@@ -62,21 +63,13 @@ fun WishlistScreen(
         val wishlist by wishlistLiveData.observeAsState()
         val productsData by productsLiveData.observeAsState()
 
-        fun getProductDataByProductId(productId: Long): Product? {
-            return productsData?.find { it.id == productId }
+        if (token == null || username == null) {
+            PlaceholderScreen(info = "Please login to view your wishlist!")
+            return
         }
 
-        if (username == null || token == null) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Please login to view your wishlist",
-                    fontFamily = MaterialTheme.typography.titleLarge.fontFamily
-                )
-            }
-            return
+        fun getProductDataByProductId(productId: Long): Product? {
+            return productsData?.find { it.id == productId }
         }
 
         LaunchedEffect(key1 = true) {

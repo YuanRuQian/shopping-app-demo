@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.history.OrderDetail
 import yuan.lydia.shoppingappdemo.network.history.OrderItem
+import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -49,7 +50,12 @@ fun OrderDetailsScreen(
         verticalArrangement = Arrangement.Top
     ) {
         val context = LocalContext.current
-        val token = UserInfoManager.getInstance(context).getToken()!!
+        val token = UserInfoManager.getInstance(context).getToken()
+
+        if(token == null) {
+            PlaceholderScreen(info = "Please login to view order details!")
+            return
+        }
 
         LaunchedEffect(key1 = true) {
             getOrderDetail(token)
@@ -72,7 +78,7 @@ fun OrderDetailsScreen(
 
 
         if (orderDetail == null) {
-            Text(text = "Order details not found")
+            PlaceholderScreen(info = "No order details found!")
         } else {
 
             // Display order items

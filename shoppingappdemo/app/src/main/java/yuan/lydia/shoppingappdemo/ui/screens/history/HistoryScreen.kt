@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LiveData
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.history.Order
+import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -38,17 +39,22 @@ fun HistoryScreen(
     getOrderHistory: (String) -> Unit,
     checkOutOrderDetails: (String) -> Unit,
 ) {
+    val context = LocalContext.current
+    val token = UserInfoManager.getInstance(context).getToken()
 
     val orderHistory by orderHistoryLiveData.observeAsState()
+
+    if(token == null) {
+        PlaceholderScreen(info = "Please login to view order history!")
+        return
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val context = LocalContext.current
-        val token = UserInfoManager.getInstance(context).getToken()!!
-
         LaunchedEffect(key1 = true) {
             getOrderHistory(token)
         }
@@ -64,7 +70,7 @@ fun HistoryScreen(
 @Composable
 fun OrderHistoryList(orderHistory: List<Order>, checkOutOrderDetails: (String) -> Unit = {}) {
     if (orderHistory.isEmpty()) {
-        Text(text = "No order history")
+        PlaceholderScreen(info = "No order history!")
         return
     }
     LazyColumn {

@@ -44,6 +44,7 @@ import androidx.lifecycle.LiveData
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.CartItemEntity
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
+import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
 
 
 @Composable
@@ -65,22 +66,7 @@ fun CartScreen(
     val productsData by productsLiveData.observeAsState()
 
     if (username == null || token == null) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Please login to view your cart",
-                    fontFamily = MaterialTheme.typography.titleLarge.fontFamily
-                )
-            }
-        }
+        PlaceholderScreen("Please login to view cart!")
         return
     }
 
@@ -100,16 +86,7 @@ fun CartScreen(
     ) {
 
         if (userCartData.isNullOrEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "$username's cart is empty!",
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
+            PlaceholderScreen(info = "Your cart is empty!")
             return
         }
 
@@ -127,6 +104,8 @@ fun CartScreen(
         )
     }
 }
+
+
 
 @Composable
 fun UserCart(

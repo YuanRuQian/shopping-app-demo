@@ -56,6 +56,7 @@ import androidx.lifecycle.LiveData
 import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.WishlistItemEntity
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
+import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,6 +76,15 @@ fun ShoppingScreen(
     var selectedFilteredType by remember { mutableStateOf(FilterType.NONE) }
     val products by productsLiveData.observeAsState()
     val wishList by wishListLiveData.observeAsState()
+
+    val context = LocalContext.current
+    val token = UserInfoManager.getInstance(context).getToken()
+    val username = UserInfoManager.getInstance(context).getUsername()
+
+    if(token == null || username == null) {
+        PlaceholderScreen(info = "Please login to view products!")
+        return
+    }
 
     fun ifProductIsInWishlist(productId: Long): Boolean {
         if (wishList.isNullOrEmpty()) {
@@ -176,10 +186,6 @@ fun ShoppingScreen(
             }
         }
 
-
-        val context = LocalContext.current
-        val token = UserInfoManager.getInstance(context).getToken()!!
-        val username = UserInfoManager.getInstance(context).getUsername()!!
 
         LaunchedEffect(key1 = true) {
             getProducts(token)

@@ -43,7 +43,6 @@ import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
 import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
 
-// TODO: the last card should not overlay with the sticky check out footer
 @Composable
 fun CartScreen(
     loadProductsData: (String) -> Unit,
@@ -123,7 +122,8 @@ fun UserCart(
                     cartItem = userCartData[index],
                     updateQuantity = updateQuantity,
                     showSnackbarMessage = showSnackbarMessage,
-                    getProductDataByProductId = getProductDataByProductId
+                    getProductDataByProductId = getProductDataByProductId,
+                    useLastCardStyle = index == userCartData.size - 1
                 )
             }
         }
@@ -173,7 +173,8 @@ fun CartItem(
     cartItem: CartItemEntity,
     updateQuantity: (String, Long, Int) -> Unit,
     showSnackbarMessage: (String) -> Unit,
-    getProductDataByProductId: (Long) -> Product?
+    getProductDataByProductId: (Long) -> Product?,
+    useLastCardStyle: Boolean
 ) {
 
     Log.d("CartItem", "CartItem ${cartItem.productId} quantity: ${cartItem.quantity}}")
@@ -191,7 +192,12 @@ fun CartItem(
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(
+                top = 16.dp,
+                start = 16.dp,
+                end = 16.dp,
+                bottom = if (useLastCardStyle) 80.dp else 16.dp
+            )
     ) {
         Box(
             modifier = Modifier
@@ -211,7 +217,8 @@ fun CartItem(
                         text = productInfo.name,
                         modifier = Modifier
                             .padding(start = 16.dp, top = 16.dp, end = 16.dp)
-                            .fillMaxWidth()
+                            .fillMaxWidth(),
+                        fontWeight = FontWeight.Bold
                     )
 
                     Text(

@@ -14,8 +14,6 @@ import yuan.lydia.shoppingappdemo.network.history.HistoryRepository
 import yuan.lydia.shoppingappdemo.network.history.Order
 import yuan.lydia.shoppingappdemo.network.history.OrderDetail
 
-// TODO: how to sort the order history
-
 class HistoryViewModel(
     private val historyRepository: HistoryRepository
 ) : ViewModel() {

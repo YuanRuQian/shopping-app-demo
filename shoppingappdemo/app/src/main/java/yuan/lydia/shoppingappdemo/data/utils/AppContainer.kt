@@ -56,7 +56,6 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
         NetworkWishlistRepository(wishlistServices)
     }
 
-    // FIXME: import base url dynamically from config file or environment variable instead of hardcoding it
     // https://developer.android.com/studio/run/emulator-networking
     // 10.0.0.2 in Android is the special alias to your host loopback interface (127.0.0.1 on your development machine)
     private val baseUrl = "http://10.0.2.2:8080"

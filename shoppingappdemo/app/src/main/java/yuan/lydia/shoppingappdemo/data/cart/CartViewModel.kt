@@ -15,7 +15,6 @@ import yuan.lydia.shoppingappdemo.data.cart.repository.CartRepository
 import yuan.lydia.shoppingappdemo.network.cart.Order
 import yuan.lydia.shoppingappdemo.network.cart.OrderRequest
 
-// TODO: move wishlist stuff to watchlist APIs instead of local DB
 class CartViewModel(private val cartRepository: CartRepository) :
     ViewModel() {
 

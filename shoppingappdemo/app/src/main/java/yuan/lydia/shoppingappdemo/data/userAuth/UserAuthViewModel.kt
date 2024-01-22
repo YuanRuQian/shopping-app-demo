@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.ShoppingApplication
+import yuan.lydia.shoppingappdemo.network.extractErrorBody
 import yuan.lydia.shoppingappdemo.network.userAuth.LoginRequest
 import yuan.lydia.shoppingappdemo.network.userAuth.LoginResponse
 import yuan.lydia.shoppingappdemo.network.userAuth.RegisterRequest
@@ -32,7 +33,6 @@ sealed interface UiState {
     data object Loading : UiState
 }
 
-// TODO: retrofit login / register failure returns 403 (wrong password), throws error, cannot display the returned error message
 class UserAuthViewModel(
     private val userAuthRepository: UserAuthRepository
 ) : ViewModel() {
@@ -52,15 +52,7 @@ class UserAuthViewModel(
                 UiState.LoginError(response)
             }
         } catch (e: retrofit2.HttpException) {
-            val errorCode = e.code()
-            val errorMessage = e.message()
-            val errorBody = e.response()?.errorBody()?.string()
-            Log.d("UserAuthViewModel", "login network error: $e")
-            Log.d("UserAuthViewModel", "login network error code: $errorCode")
-            Log.d("UserAuthViewModel", "login network error message: $errorMessage")
-            Log.d("UserAuthViewModel", "login network error body: $errorBody")
-            // TODO: show exception message to user
-            UiState.LoginNetworkError("Login failed, please check your username and password, and try again.")
+            UiState.LoginNetworkError(extractErrorBody(e))
         }
     }
 
@@ -87,7 +79,7 @@ class UserAuthViewModel(
                 }
             } catch (e: retrofit2.HttpException) {
                 Log.d("UserAuthViewModel", "register network error: $e")
-                UiState.RegisterNetworkError("Register failed, please check your input and network connection, and try again. $e")
+                UiState.RegisterNetworkError(extractErrorBody(e))
             }
         }
     }

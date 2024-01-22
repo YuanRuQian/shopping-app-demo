@@ -39,7 +39,7 @@ fun WishlistScreen(
     loadWishlistData: (String) -> Unit,
     wishlist: List<WishlistProduct>?,
     productsData: List<Product>?,
-    removeFromWishList: (String, Long) -> Unit,
+    removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
     showSnackbarMessage: (String) -> Unit,
     addToCart: (String, Long) -> Unit
 ) {
@@ -85,7 +85,7 @@ fun WishlistScreen(
 fun Wishlist(
     wishlist: List<WishlistProduct>,
     getProductDataByProductId: (Long) -> Product?,
-    removeFromWishList: (String, Long) -> Unit,
+    removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
     showSnackbarMessage: (String) -> Unit,
     username: String,
     addToCart: (String, Long) -> Unit
@@ -121,7 +121,7 @@ fun Wishlist(
 fun WishlistItem(
     wishlistProduct: WishlistProduct,
     getProductDataByProductId: (Long) -> Product?,
-    removeFromWishList: (String, Long) -> Unit,
+    removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
     addToCart: (String, Long) -> Unit,
     showSnackbarMessage: (String) -> Unit,
     username: String
@@ -181,14 +181,16 @@ fun WishlistItem(
 @Composable
 fun RemoveWishlistButton(
     productname: String,
-    removeFromWishList: (String, Long) -> Unit,
+    removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
     productId: Long,
     showSnackbarMessage: (String) -> Unit
 ) {
     val token = UserInfoManager.getInstance(LocalContext.current).getToken()!!
     Button(
         onClick = {
-            removeFromWishList(token, productId)
+            removeFromWishList(token, productId, {
+                showSnackbarMessage("Removed $productname from Wishlist!")
+            }, showSnackbarMessage)
             showSnackbarMessage("Removed $productname from Wishlist!")
         },
         modifier = Modifier

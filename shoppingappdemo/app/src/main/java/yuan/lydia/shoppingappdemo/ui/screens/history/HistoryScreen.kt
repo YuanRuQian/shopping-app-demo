@@ -79,7 +79,6 @@ fun OrderHistoryList(orderHistory: List<Order>, checkOutOrderDetails: (String) -
     }
 }
 
-// TODO: add quantity change event
 @Composable
 fun OrderItem(order: Order, checkOutOrderDetails: (Order) -> Unit) {
     ElevatedCard(

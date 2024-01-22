@@ -64,8 +64,8 @@ fun ShoppingScreen(
     products: List<Product>?,
     increaseQuantity: (String, Long, Int) -> Unit,
     showSnackbarMessage: (String) -> Unit,
-    addToWishList: (String, Long) -> Unit,
-    removeFromWishList: (String, Long) -> Unit,
+    addToWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
+    removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
     loadWishList: (String) -> Unit,
     wishlist: List<WishlistProduct>?,
 ) {
@@ -203,8 +203,8 @@ fun ProductsList(
     products: List<Product>,
     increaseQuantity: (String, Long, Int) -> Unit,
     showSnackbarMessage: (String) -> Unit,
-    addToWishList: (String, Long) -> Unit,
-    removeFromWishList: (String, Long) -> Unit,
+    addToWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
+    removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
     ifProductIsInWishlist: (Long) -> Boolean
 ) {
     if (products.isEmpty()) {
@@ -234,16 +234,14 @@ enum class FilterType(val readableText: String) {
     NO_MORE_THAN_MAX_PRICE("Under Max Price")
 }
 
-
-// TODO: add quantity change event
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductItem(
     product: Product,
     increaseQuantity: (String, Long, Int) -> Unit,
     showSnackbarMessage: (String) -> Unit,
-    addToWishList: (String, Long) -> Unit,
-    removeFromWishList: (String, Long) -> Unit,
+    addToWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
+    removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
     ifProductIsInWishlist: (Long) -> Boolean
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -283,7 +281,7 @@ fun ProductItem(
                         color = MaterialTheme.colorScheme.secondary,
                         fontSize = MaterialTheme.typography.bodySmall.fontSize
                     )
-                    // TODO: use localized price
+
                     Text(
                         text = "Price: $${product.retailPrice}",
                         modifier = Modifier.padding(top = 4.dp)
@@ -434,19 +432,35 @@ fun WishlistButton(
     token: String,
     productname: String,
     isInWishlist: Boolean,
-    addToWishList: (String, Long) -> Unit,
-    removeFromWishList: (String, Long) -> Unit,
+    addToWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
+    removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
     productId: Long,
     showSnackbarMessage: (String) -> Unit
 ) {
     Button(
         onClick = {
             if (isInWishlist) {
-                removeFromWishList(token, productId)
-                showSnackbarMessage("Removed $productname from Wishlist!")
+                removeFromWishList(
+                    token,
+                    productId,
+                    {
+                        showSnackbarMessage("Removed $productname from wishlist!")
+                    },
+                    {
+                        showSnackbarMessage(it)
+                    }
+                )
             } else {
-                addToWishList(token, productId)
-                showSnackbarMessage("Added $productname to Wishlist!")
+                addToWishList(
+                    token,
+                    productId,
+                    {
+                        showSnackbarMessage("Added $productname to wishlist!")
+                    },
+                    {
+                        showSnackbarMessage(it)
+                    }
+                )
             }
         },
         modifier = Modifier

@@ -17,15 +17,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.LiveData
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.history.Order
 import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
@@ -35,14 +32,12 @@ import java.util.Locale
 
 @Composable
 fun HistoryScreen(
-    orderHistoryLiveData: LiveData<List<Order>>,
+    orderHistory: List<Order>?,
     getOrderHistory: (String) -> Unit,
     checkOutOrderDetails: (String) -> Unit,
 ) {
     val context = LocalContext.current
     val token = UserInfoManager.getInstance(context).getToken()
-
-    val orderHistory by orderHistoryLiveData.observeAsState()
 
     if(token == null) {
         PlaceholderScreen(info = "Please login to view order history!")

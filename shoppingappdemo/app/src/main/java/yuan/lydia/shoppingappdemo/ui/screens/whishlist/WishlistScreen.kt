@@ -23,15 +23,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
 import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
@@ -40,8 +37,8 @@ import yuan.lydia.shoppingappdemo.network.wishlist.Product as WishlistProduct
 @Composable
 fun WishlistScreen(
     loadWishlistData: (String) -> Unit,
-    wishlistLiveData: LiveData<List<WishlistProduct>>,
-    productsLiveData: LiveData<List<Product>>,
+    wishlist: List<WishlistProduct>?,
+    productsData: List<Product>?,
     removeFromWishList: (String, Long) -> Unit,
     showSnackbarMessage: (String) -> Unit,
     addToCart: (String, Long) -> Unit
@@ -59,8 +56,6 @@ fun WishlistScreen(
         val userInfoManager = UserInfoManager.getInstance(context)
         val token = userInfoManager.getToken()
         val username = userInfoManager.getUsername()
-        val wishlist by wishlistLiveData.observeAsState()
-        val productsData by productsLiveData.observeAsState()
 
         if (token == null || username == null) {
             PlaceholderScreen(info = "Please login to view your wishlist!")

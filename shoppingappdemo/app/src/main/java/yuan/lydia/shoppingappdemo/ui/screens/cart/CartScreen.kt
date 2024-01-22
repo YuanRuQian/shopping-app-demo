@@ -29,8 +29,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,7 +38,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.LiveData
 import yuan.lydia.shoppingappdemo.data.cart.database.CartItemEntity
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
@@ -50,22 +47,20 @@ import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
 @Composable
 fun CartScreen(
     loadProductsData: (String) -> Unit,
-    productsLiveData: LiveData<List<Product>>,
+    productsData: List<Product>?,
     loadUserCartData: (String) -> Unit,
-    userCartDataLiveData: LiveData<List<CartItemEntity>>,
+    userCartData: List<CartItemEntity>?,
     updateQuantity: (String, Long, Int) -> Unit,
     showSnackbarMessage: (String) -> Unit,
     checkout: (String, List<CartItemEntity>) -> Unit,
-    checkoutSuccessLiveData: LiveData<Boolean?>,
+    checkoutSuccessStatus: Boolean?,
     onCheckoutSuccess: (String) -> Unit
 ) {
     val context = LocalContext.current
     val userInfoManager = UserInfoManager.getInstance(context)
     val username = userInfoManager.getUsername()
     val token = userInfoManager.getToken()
-    val userCartData by userCartDataLiveData.observeAsState()
-    val productsData by productsLiveData.observeAsState()
-    val checkoutSuccessStatus by checkoutSuccessLiveData.observeAsState()
+
 
     if (username == null || token == null) {
         PlaceholderScreen("Please login to view cart!")
@@ -99,7 +94,7 @@ fun CartScreen(
         }
 
         UserCart(
-            userCartData = userCartData!!,
+            userCartData = userCartData,
             updateQuantity = { username, productId, newQuantity ->
                 updateQuantity(username, productId, newQuantity)
             },

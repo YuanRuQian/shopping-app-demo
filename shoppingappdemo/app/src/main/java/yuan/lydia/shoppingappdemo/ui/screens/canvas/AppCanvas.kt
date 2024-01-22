@@ -10,6 +10,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,7 +36,6 @@ import yuan.lydia.shoppingappdemo.ui.screens.userAuth.LoginScreen
 import yuan.lydia.shoppingappdemo.ui.screens.userAuth.RegisterScreen
 import yuan.lydia.shoppingappdemo.ui.screens.whishlist.WishlistScreen
 
-// TODO: probably not pass live data to screens, hoist the live data to app canvas and pass the immutable data to screens
 @Composable
 fun AppCanvas(
     snackbarViewModel: SnackbarViewModel = viewModel(factory = SnackbarViewModel.Factory),
@@ -49,6 +50,12 @@ fun AppCanvas(
     val context = LocalContext.current
     val (isUserLoggedIn, setIsUserLoggedIn) = remember { mutableStateOf(false) }
     val historyViewModel: HistoryViewModel = viewModel(factory = HistoryViewModel.Factory)
+    val products by shoppingViewModel.filteredProducts.observeAsState()
+    val wishlist by wishlistViewModel.wishlist.observeAsState()
+    val userCart by cartViewModel.userCartLiveData.observeAsState()
+    val cartCheckOutSuccessStatus by cartViewModel.checkoutSuccess.observeAsState()
+    val orderHistory by historyViewModel.orderHistory.observeAsState()
+    val currentOrderDetails by historyViewModel.currentOrderDetails.observeAsState()
 
     LaunchedEffect(key1 = true) {
         setIsUserLoggedIn(UserInfoManager.getInstance(context).isTokenExist())
@@ -132,13 +139,13 @@ fun AppCanvas(
                         getProducts = {
                             shoppingViewModel.getProducts(it)
                         },
-                        productsLiveData = shoppingViewModel.filteredProducts,
+                        products = products,
                         increaseQuantity = cartViewModel::increaseQuantityThenReloadUserCartData,
                         showSnackbarMessage = snackbarViewModel::showSnackbar,
                         addToWishList = wishlistViewModel::addToWishlistAndReloadWishlistData,
                         removeFromWishList = wishlistViewModel::removeFromWishlistAndReloadWishlistData,
                         loadWishList = wishlistViewModel::loadWishlist,
-                        wishListLiveData = wishlistViewModel.wishlist,
+                        wishlist = wishlist,
                     )
                 }
 
@@ -147,13 +154,13 @@ fun AppCanvas(
                         loadProductsData = { token ->
                             shoppingViewModel.getProducts(token)
                         },
-                        productsLiveData = shoppingViewModel.filteredProducts,
+                        productsData = products,
                         loadUserCartData = cartViewModel::loadUserCartData,
-                        userCartDataLiveData = cartViewModel.userCartLiveData,
+                        userCartData = userCart,
                         updateQuantity = cartViewModel::updateQuantityThenReloadUserCartData,
                         showSnackbarMessage = snackbarViewModel::showSnackbar,
                         checkout = cartViewModel::checkout,
-                        checkoutSuccessLiveData = cartViewModel.checkoutSuccess,
+                        checkoutSuccessStatus = cartCheckOutSuccessStatus,
                         onCheckoutSuccess = { username ->
                             cartViewModel.clearUserCartAndReloadUserCartData(
                                 username
@@ -168,7 +175,7 @@ fun AppCanvas(
 
                 composable(AppRoute.History.route) {
                     HistoryScreen(
-                        orderHistoryLiveData = historyViewModel.orderHistory,
+                        orderHistory = orderHistory,
                         getOrderHistory = historyViewModel::getOrderHistory,
                         checkOutOrderDetails = { orderId ->
                             navController.navigate("${AppRoute.OrderDetails.route}/${orderId}")
@@ -179,8 +186,8 @@ fun AppCanvas(
                 composable(AppRoute.Wishlist.route) {
                     WishlistScreen(
                         loadWishlistData = wishlistViewModel::loadWishlist,
-                        wishlistLiveData = wishlistViewModel.wishlist,
-                        productsLiveData = shoppingViewModel.filteredProducts,
+                        wishlist = wishlist,
+                        productsData = products,
                         removeFromWishList = wishlistViewModel::removeFromWishlistAndReloadWishlistData,
                         showSnackbarMessage = snackbarViewModel::showSnackbar,
                         addToCart = cartViewModel::addToCart
@@ -194,7 +201,7 @@ fun AppCanvas(
                             getOrderDetail = { token ->
                                 historyViewModel.getOrderDetails(token, orderId)
                             },
-                            orderDetail = historyViewModel.currentOrderDetails.value,
+                            orderDetail = currentOrderDetails,
                             onBack = historyViewModel::clearCurrentOrderDetails
                         )
                     } else {

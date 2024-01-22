@@ -33,6 +33,7 @@ import yuan.lydia.shoppingappdemo.ui.screens.userAuth.LoginScreen
 import yuan.lydia.shoppingappdemo.ui.screens.userAuth.RegisterScreen
 import yuan.lydia.shoppingappdemo.ui.screens.whishlist.WishlistScreen
 
+// TODO: probably not pass live data to screens, hoist the live data to app canvas and pass the immutable data to screens
 @Composable
 fun AppCanvas(
     snackbarViewModel: SnackbarViewModel = viewModel(factory = SnackbarViewModel.Factory),

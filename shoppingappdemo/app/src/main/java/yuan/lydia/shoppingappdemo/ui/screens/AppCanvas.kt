@@ -160,9 +160,8 @@ fun AppCanvas(
                         navigateToRegister = {
                             navController.navigate(AppRoute.Register.route)
                         },
-                        showSnackBarMessage = { message ->
-                            snackbarViewModel.showSnackbar(message)
-                        }
+                        showSnackBarMessage =
+                        snackbarViewModel::showSnackbar
                     )
                 }
                 composable(AppRoute.Register.route) {
@@ -176,9 +175,7 @@ fun AppCanvas(
                         navigateToLogin = {
                             navController.navigate(AppRoute.Login.route)
                         },
-                        showSnackBarMessage = { message ->
-                            snackbarViewModel.showSnackbar(message)
-                        }
+                        showSnackBarMessage = snackbarViewModel::showSnackbar
                     )
                 }
                 composable(AppRoute.Shopping.route) {
@@ -190,31 +187,11 @@ fun AppCanvas(
                             shoppingViewModel.getProducts(it)
                         },
                         productsLiveData = shoppingViewModel.filteredProducts,
-                        increaseQuantity = { username, productId, addedQuantity ->
-                            cartWishlistManagementViewModel.increaseQuantityThenReloadUserCartData(
-                                username,
-                                productId,
-                                addedQuantity
-                            )
-                        },
-                        showSnackbarMessage = { message ->
-                            snackbarViewModel.showSnackbar(message)
-                        },
-                        addToWishList = { username, productId ->
-                            cartWishlistManagementViewModel.addToWishlistAndReloadWishlistData(
-                                username,
-                                productId
-                            )
-                        },
-                        removeFromWishList = { username, productId ->
-                            cartWishlistManagementViewModel.removeFromWishlistAndReloadWishlistData(
-                                username,
-                                productId
-                            )
-                        },
-                        loadWishList = { username ->
-                            cartWishlistManagementViewModel.loadWishlistData(username)
-                        },
+                        increaseQuantity = cartWishlistManagementViewModel::increaseQuantityThenReloadUserCartData,
+                        showSnackbarMessage = snackbarViewModel::showSnackbar,
+                        addToWishList = cartWishlistManagementViewModel::addToWishlistAndReloadWishlistData,
+                        removeFromWishList = cartWishlistManagementViewModel::removeFromWishlistAndReloadWishlistData,
+                        loadWishList = cartWishlistManagementViewModel::loadWishlistData,
                         wishListLiveData = cartWishlistManagementViewModel.userWishlistLiveData
                     )
                 }
@@ -225,23 +202,11 @@ fun AppCanvas(
                             shoppingViewModel.getProducts(token)
                         },
                         productsLiveData = shoppingViewModel.filteredProducts,
-                        loadUserCartData = { username ->
-                            cartWishlistManagementViewModel.loadUserCartData(username)
-                        },
+                        loadUserCartData = cartWishlistManagementViewModel::loadUserCartData,
                         userCartDataLiveData = cartWishlistManagementViewModel.userCartLiveData,
-                        updateQuantity = { username, productId, newQuantity ->
-                            cartWishlistManagementViewModel.updateQuantityThenReloadUserCartData(
-                                username,
-                                productId,
-                                newQuantity
-                            )
-                        },
-                        showSnackbarMessage = { message ->
-                            snackbarViewModel.showSnackbar(message)
-                        },
-                        checkout = { token, cartItems ->
-                            cartWishlistManagementViewModel.checkout(token, cartItems)
-                        },
+                        updateQuantity = cartWishlistManagementViewModel::updateQuantityThenReloadUserCartData,
+                        showSnackbarMessage = snackbarViewModel::showSnackbar,
+                        checkout = cartWishlistManagementViewModel::checkout,
                         onCheckoutSuccess = { username ->
                             cartWishlistManagementViewModel.clearUserCartAndReloadUserCartData(
                                 username
@@ -257,9 +222,7 @@ fun AppCanvas(
                 composable(AppRoute.History.route) {
                     HistoryScreen(
                         orderHistoryLiveData = historyViewModel.orderHistory,
-                        getOrderHistory = { token ->
-                            historyViewModel.getOrderHistory(token)
-                        },
+                        getOrderHistory = historyViewModel::getOrderHistory,
                         checkOutOrderDetails = { orderId ->
                             navController.navigate("${AppRoute.OrderDetails.route}/${orderId}")
                         }
@@ -268,29 +231,13 @@ fun AppCanvas(
 
                 composable(AppRoute.Wishlist.route) {
                     WishlistScreen(
-                        loadWishlistData = { username ->
-                            cartWishlistManagementViewModel.loadWishlistData(username)
-                        },
+                        loadWishlistData = cartWishlistManagementViewModel::loadWishlistData,
                         wishlistLiveData = cartWishlistManagementViewModel.userWishlistLiveData,
-                        loadProductsData = { token ->
-                            shoppingViewModel.getProducts(token)
-                        },
+                        loadProductsData = shoppingViewModel::getProducts,
                         productsLiveData = shoppingViewModel.filteredProducts,
-                        removeFromWishList = { username, productId ->
-                            cartWishlistManagementViewModel.removeFromWishlistAndReloadWishlistData(
-                                username,
-                                productId
-                            )
-                        },
-                        showSnackbarMessage = { message ->
-                            snackbarViewModel.showSnackbar(message)
-                        },
-                        addToCart = { username, productId ->
-                            cartWishlistManagementViewModel.addToCart(
-                                username,
-                                productId
-                            )
-                        }
+                        removeFromWishList = cartWishlistManagementViewModel::removeFromWishlistAndReloadWishlistData,
+                        showSnackbarMessage = snackbarViewModel::showSnackbar,
+                        addToCart = cartWishlistManagementViewModel::addToCart
                     )
                 }
 
@@ -302,15 +249,12 @@ fun AppCanvas(
                                 historyViewModel.getOrderDetails(token, orderId)
                             },
                             orderDetail = historyViewModel.currentOrderDetails.value,
-                            onBack = {
-                                historyViewModel.clearCurrentOrderDetails()
-                            }
+                            onBack = historyViewModel::clearCurrentOrderDetails
                         )
                     } else {
                         snackbarViewModel.showSnackbar("No order id found")
                     }
                 }
-
             }
         }
     }

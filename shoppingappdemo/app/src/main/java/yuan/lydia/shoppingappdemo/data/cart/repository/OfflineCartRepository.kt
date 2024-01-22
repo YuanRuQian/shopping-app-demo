@@ -7,10 +7,10 @@ import yuan.lydia.shoppingappdemo.network.cart.CartApiServices
 import yuan.lydia.shoppingappdemo.network.cart.OrderRequest
 import yuan.lydia.shoppingappdemo.network.cart.OrderResponse
 
-class OfflineCartManagementRepository(
+class OfflineCartRepository(
     private val cartItemDao: CartItemDao,
     private val cartApiServices: CartApiServices
-) : CartManagementRepository {
+) : CartRepository {
     override suspend fun submitOrder(token: String, orderRequest: OrderRequest): OrderResponse =
         cartApiServices.submitOrder(orderRequest, "Bearer $token")
 

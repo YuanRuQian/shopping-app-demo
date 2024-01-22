@@ -6,16 +6,16 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(entities = [CartItemEntity::class], version = 1, exportSchema = false)
-abstract class CartManagementDatabase : RoomDatabase() {
+abstract class CartDatabase : RoomDatabase() {
     abstract fun cartItemDao(): CartItemDao
 
     companion object {
         @Volatile
-        private var Instance: CartManagementDatabase? = null
+        private var Instance: CartDatabase? = null
 
-        fun getDatabase(context: Context): CartManagementDatabase {
+        fun getDatabase(context: Context): CartDatabase {
             return Instance ?: synchronized(this) {
-                Room.databaseBuilder(context, CartManagementDatabase::class.java, "cart_wishlist_database")
+                Room.databaseBuilder(context, CartDatabase::class.java, "cart_wishlist_database")
                     .build()
                     .also { Instance = it }
             }

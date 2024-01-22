@@ -20,11 +20,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
-import yuan.lydia.shoppingappdemo.data.cart.CartManagementViewModel
+import yuan.lydia.shoppingappdemo.data.cart.CartViewModel
 import yuan.lydia.shoppingappdemo.data.history.HistoryViewModel
 import yuan.lydia.shoppingappdemo.data.shopping.ShoppingViewModel
 import yuan.lydia.shoppingappdemo.data.utils.SnackbarViewModel
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
+import yuan.lydia.shoppingappdemo.data.wishlist.WishlistViewModel
 import yuan.lydia.shoppingappdemo.ui.screens.cart.CartScreen
 import yuan.lydia.shoppingappdemo.ui.screens.history.HistoryScreen
 import yuan.lydia.shoppingappdemo.ui.screens.history.OrderDetailsScreen
@@ -37,10 +38,11 @@ import yuan.lydia.shoppingappdemo.ui.screens.whishlist.WishlistScreen
 @Composable
 fun AppCanvas(
     snackbarViewModel: SnackbarViewModel = viewModel(factory = SnackbarViewModel.Factory),
-    cartManagementViewModel: CartManagementViewModel = viewModel(
-        factory = CartManagementViewModel.Factory
+    cartViewModel: CartViewModel = viewModel(
+        factory = CartViewModel.Factory
     ),
-    shoppingViewModel: ShoppingViewModel = viewModel(factory = ShoppingViewModel.Factory)
+    shoppingViewModel: ShoppingViewModel = viewModel(factory = ShoppingViewModel.Factory),
+    wishlistViewModel: WishlistViewModel = viewModel(factory = WishlistViewModel.Factory)
 ) {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -131,12 +133,12 @@ fun AppCanvas(
                             shoppingViewModel.getProducts(it)
                         },
                         productsLiveData = shoppingViewModel.filteredProducts,
-                        increaseQuantity = cartManagementViewModel::increaseQuantityThenReloadUserCartData,
+                        increaseQuantity = cartViewModel::increaseQuantityThenReloadUserCartData,
                         showSnackbarMessage = snackbarViewModel::showSnackbar,
-                        addToWishList = cartManagementViewModel::addToWishlistAndReloadWishlistData,
-                        removeFromWishList = cartManagementViewModel::removeFromWishlistAndReloadWishlistData,
-                        loadWishList = cartManagementViewModel::loadWishlistData,
-                        wishListLiveData = cartManagementViewModel.userWishlistLiveData
+                        addToWishList = wishlistViewModel::addToWishlistAndReloadWishlistData,
+                        removeFromWishList = wishlistViewModel::removeFromWishlistAndReloadWishlistData,
+                        loadWishList = wishlistViewModel::loadWishlist,
+                        wishListLiveData = wishlistViewModel.wishlist,
                     )
                 }
 
@@ -146,14 +148,14 @@ fun AppCanvas(
                             shoppingViewModel.getProducts(token)
                         },
                         productsLiveData = shoppingViewModel.filteredProducts,
-                        loadUserCartData = cartManagementViewModel::loadUserCartData,
-                        userCartDataLiveData = cartManagementViewModel.userCartLiveData,
-                        updateQuantity = cartManagementViewModel::updateQuantityThenReloadUserCartData,
+                        loadUserCartData = cartViewModel::loadUserCartData,
+                        userCartDataLiveData = cartViewModel.userCartLiveData,
+                        updateQuantity = cartViewModel::updateQuantityThenReloadUserCartData,
                         showSnackbarMessage = snackbarViewModel::showSnackbar,
-                        checkout = cartManagementViewModel::checkout,
-                        checkoutSuccessLiveData = cartManagementViewModel.checkoutSuccess,
+                        checkout = cartViewModel::checkout,
+                        checkoutSuccessLiveData = cartViewModel.checkoutSuccess,
                         onCheckoutSuccess = { username ->
-                            cartManagementViewModel.clearUserCartAndReloadUserCartData(
+                            cartViewModel.clearUserCartAndReloadUserCartData(
                                 username
                             )
                             navController.navigate(AppRoute.Shopping.route) {
@@ -176,13 +178,12 @@ fun AppCanvas(
 
                 composable(AppRoute.Wishlist.route) {
                     WishlistScreen(
-                        loadWishlistData = cartManagementViewModel::loadWishlistData,
-                        wishlistLiveData = cartManagementViewModel.userWishlistLiveData,
-                        loadProductsData = shoppingViewModel::getProducts,
+                        loadWishlistData = wishlistViewModel::loadWishlist,
+                        wishlistLiveData = wishlistViewModel.wishlist,
                         productsLiveData = shoppingViewModel.filteredProducts,
-                        removeFromWishList = cartManagementViewModel::removeFromWishlistAndReloadWishlistData,
+                        removeFromWishList = wishlistViewModel::removeFromWishlistAndReloadWishlistData,
                         showSnackbarMessage = snackbarViewModel::showSnackbar,
-                        addToCart = cartManagementViewModel::addToCart
+                        addToCart = cartViewModel::addToCart
                     )
                 }
 

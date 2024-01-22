@@ -5,7 +5,7 @@ import yuan.lydia.shoppingappdemo.data.cart.database.CartItemEntity
 import yuan.lydia.shoppingappdemo.network.cart.OrderRequest
 import yuan.lydia.shoppingappdemo.network.cart.OrderResponse
 
-interface CartManagementRepository {
+interface CartRepository {
 
     suspend fun submitOrder(token: String, orderRequest: OrderRequest): OrderResponse
 

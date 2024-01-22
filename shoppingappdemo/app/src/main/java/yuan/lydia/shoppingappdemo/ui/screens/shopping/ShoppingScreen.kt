@@ -56,6 +56,7 @@ import androidx.lifecycle.LiveData
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
 import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
+import yuan.lydia.shoppingappdemo.network.wishlist.Product as WishlistProduct
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,7 +69,7 @@ fun ShoppingScreen(
     addToWishList: (String, Long) -> Unit,
     removeFromWishList: (String, Long) -> Unit,
     loadWishList: (String) -> Unit,
-    wishListLiveData: LiveData<List<WishlistItemEntity>>,
+    wishListLiveData: LiveData<List<WishlistProduct>>,
 ) {
     var maxPrice: Int? by remember { mutableStateOf(null) }
     var expanded by remember { mutableStateOf(false) }
@@ -80,7 +81,7 @@ fun ShoppingScreen(
     val token = UserInfoManager.getInstance(context).getToken()
     val username = UserInfoManager.getInstance(context).getUsername()
 
-    if(token == null || username == null) {
+    if (token == null || username == null) {
         PlaceholderScreen(info = "Please login to view products!")
         return
     }
@@ -90,7 +91,7 @@ fun ShoppingScreen(
             return false
         }
 
-        return wishList!!.find { it.productId == productId } != null
+        return wishList!!.find { it.id == productId } != null
     }
 
     Column(
@@ -188,7 +189,7 @@ fun ShoppingScreen(
 
         LaunchedEffect(key1 = true) {
             getProducts(token)
-            loadWishList(username)
+            loadWishList(token)
         }
 
         ProductsList(
@@ -254,6 +255,7 @@ fun ProductItem(
 
     val context = LocalContext.current
     val username = UserInfoManager.getInstance(context).getUsername()!!
+    val token = UserInfoManager.getInstance(context).getToken()!!
 
     ElevatedCard(
         modifier = Modifier
@@ -371,11 +373,11 @@ fun ProductItem(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     WishlistButton(
+                        token = token,
                         productname = product.name,
                         isInWishlist = ifProductIsInWishlist(product.id),
                         addToWishList = addToWishList,
                         removeFromWishList = removeFromWishList,
-                        username = username,
                         productId = product.id,
                         showSnackbarMessage = showSnackbarMessage
                     )
@@ -433,21 +435,21 @@ fun AddToCartButton(
 
 @Composable
 fun WishlistButton(
+    token: String,
     productname: String,
     isInWishlist: Boolean,
     addToWishList: (String, Long) -> Unit,
     removeFromWishList: (String, Long) -> Unit,
-    username: String,
     productId: Long,
     showSnackbarMessage: (String) -> Unit
 ) {
     Button(
         onClick = {
             if (isInWishlist) {
-                removeFromWishList(username, productId)
+                removeFromWishList(token, productId)
                 showSnackbarMessage("Removed $productname from Wishlist!")
             } else {
-                addToWishList(username, productId)
+                addToWishList(token, productId)
                 showSnackbarMessage("Added $productname to Wishlist!")
             }
         },

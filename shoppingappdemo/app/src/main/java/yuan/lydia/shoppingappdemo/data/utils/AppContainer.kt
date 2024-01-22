@@ -6,9 +6,9 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import yuan.lydia.shoppingappdemo.data.cart.database.CartManagementDatabase
-import yuan.lydia.shoppingappdemo.data.cart.repository.CartManagementRepository
-import yuan.lydia.shoppingappdemo.data.cart.repository.OfflineCartManagementRepository
+import yuan.lydia.shoppingappdemo.data.cart.database.CartDatabase
+import yuan.lydia.shoppingappdemo.data.cart.repository.CartRepository
+import yuan.lydia.shoppingappdemo.data.cart.repository.OfflineCartRepository
 import yuan.lydia.shoppingappdemo.network.cart.CartApiServices
 import yuan.lydia.shoppingappdemo.network.history.HistoryApiServices
 import yuan.lydia.shoppingappdemo.network.history.HistoryRepository
@@ -19,6 +19,9 @@ import yuan.lydia.shoppingappdemo.network.shopping.ShoppingRepository
 import yuan.lydia.shoppingappdemo.network.userAuth.NetworkUserAuthRepository
 import yuan.lydia.shoppingappdemo.network.userAuth.UserAuthApiServices
 import yuan.lydia.shoppingappdemo.network.userAuth.UserAuthRepository
+import yuan.lydia.shoppingappdemo.network.wishlist.NetworkWishlistRepository
+import yuan.lydia.shoppingappdemo.network.wishlist.WishlistApiServices
+import yuan.lydia.shoppingappdemo.network.wishlist.WishlistRepository
 
 
 // provide the app with access to the ArtworkRepository as a global state
@@ -26,7 +29,8 @@ interface AppContainer {
     val userAuthRepository: UserAuthRepository
     val shoppingRepository: ShoppingRepository
     val historyRepository: HistoryRepository
-    val cartManagementRepository: CartManagementRepository
+    val cartRepository: CartRepository
+    val wishlistRepository: WishlistRepository
 }
 
 class DefaultAppContainer(private val context: Context) : AppContainer {
@@ -41,13 +45,16 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
         NetworkHistoryRepository(historyService)
     }
 
-    override val cartManagementRepository: CartManagementRepository by lazy {
-        OfflineCartManagementRepository(
-            CartManagementDatabase.getDatabase(context).cartItemDao(),
+    override val cartRepository: CartRepository by lazy {
+        OfflineCartRepository(
+            CartDatabase.getDatabase(context).cartItemDao(),
             cartServices
         )
     }
 
+    override val wishlistRepository: WishlistRepository by lazy {
+        NetworkWishlistRepository(wishlistServices)
+    }
 
     // FIXME: import base url dynamically from config file or environment variable instead of hardcoding it
     // https://developer.android.com/studio/run/emulator-networking
@@ -81,5 +88,9 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
 
     private val cartServices by lazy {
         serviceBase.create(CartApiServices::class.java)
+    }
+
+    private val wishlistServices by lazy {
+        serviceBase.create(WishlistApiServices::class.java)
     }
 }

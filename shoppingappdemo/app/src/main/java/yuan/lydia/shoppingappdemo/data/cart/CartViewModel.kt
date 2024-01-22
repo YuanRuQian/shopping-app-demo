@@ -11,12 +11,12 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.ShoppingApplication
 import yuan.lydia.shoppingappdemo.data.cart.database.CartItemEntity
-import yuan.lydia.shoppingappdemo.data.cart.repository.CartManagementRepository
+import yuan.lydia.shoppingappdemo.data.cart.repository.CartRepository
 import yuan.lydia.shoppingappdemo.network.cart.Order
 import yuan.lydia.shoppingappdemo.network.cart.OrderRequest
 
 // TODO: move wishlist stuff to watchlist APIs instead of local DB
-class CartManagementViewModel(private val cartManagementRepository: CartManagementRepository) :
+class CartViewModel(private val cartRepository: CartRepository) :
     ViewModel() {
 
     private val _userCartLiveData = MutableLiveData<List<CartItemEntity>>()
@@ -27,7 +27,7 @@ class CartManagementViewModel(private val cartManagementRepository: CartManageme
 
     fun loadUserCartData(username: String) {
         viewModelScope.launch {
-            cartManagementRepository.loadUserCartData(username).collect {
+            cartRepository.loadUserCartData(username).collect {
                 _userCartLiveData.value = it
             }
         }
@@ -35,13 +35,13 @@ class CartManagementViewModel(private val cartManagementRepository: CartManageme
 
     fun addToCart(username: String, productId: Long) {
         viewModelScope.launch {
-            cartManagementRepository.increaseQuantity(username, productId, 1)
+            cartRepository.increaseQuantity(username, productId, 1)
         }
     }
 
     fun updateQuantityThenReloadUserCartData(username: String, productId: Long, newQuantity: Int) {
         viewModelScope.launch {
-            cartManagementRepository.updateQuantity(username, productId, newQuantity)
+            cartRepository.updateQuantity(username, productId, newQuantity)
             loadUserCartData(username)
         }
     }
@@ -52,7 +52,7 @@ class CartManagementViewModel(private val cartManagementRepository: CartManageme
         addedQuantity: Int
     ) {
         viewModelScope.launch {
-            cartManagementRepository.increaseQuantity(username, productId, addedQuantity)
+            cartRepository.increaseQuantity(username, productId, addedQuantity)
             loadUserCartData(username)
         }
     }
@@ -74,7 +74,7 @@ class CartManagementViewModel(private val cartManagementRepository: CartManageme
         viewModelScope.launch {
             try {
                 val orderResponse =
-                    cartManagementRepository.submitOrder(token, orderRequest)
+                    cartRepository.submitOrder(token, orderRequest)
                 if (orderResponse.success) {
                     _checkoutSuccess.value = true
                     Log.d("CartWishlistManagementViewModel", "checkout success")
@@ -94,7 +94,7 @@ class CartManagementViewModel(private val cartManagementRepository: CartManageme
 
     fun clearUserCartAndReloadUserCartData(username: String) {
         viewModelScope.launch {
-            cartManagementRepository.clearCart(username)
+            cartRepository.clearCart(username)
             loadUserCartData(username)
         }
     }
@@ -104,7 +104,7 @@ class CartManagementViewModel(private val cartManagementRepository: CartManageme
             initializer {
                 val application =
                     (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as ShoppingApplication)
-                CartManagementViewModel(application.container.cartManagementRepository)
+                CartViewModel(application.container.cartRepository)
             }
         }
     }

@@ -32,16 +32,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
-import yuan.lydia.shoppingappdemo.data.cartWishlistManagement.entities.WishlistItemEntity
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
 import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
+import yuan.lydia.shoppingappdemo.network.wishlist.Product as WishlistProduct
 
 @Composable
 fun WishlistScreen(
     loadWishlistData: (String) -> Unit,
-    wishlistLiveData: LiveData<List<WishlistItemEntity>>,
-    loadProductsData: (String) -> Unit,
+    wishlistLiveData: LiveData<List<WishlistProduct>>,
     productsLiveData: LiveData<List<Product>>,
     removeFromWishList: (String, Long) -> Unit,
     showSnackbarMessage: (String) -> Unit,
@@ -73,8 +72,7 @@ fun WishlistScreen(
         }
 
         LaunchedEffect(key1 = true) {
-            loadProductsData(token)
-            loadWishlistData(username)
+            loadWishlistData(token)
         }
 
         Wishlist(
@@ -90,7 +88,7 @@ fun WishlistScreen(
 
 @Composable
 fun Wishlist(
-    wishlist: List<WishlistItemEntity>,
+    wishlist: List<WishlistProduct>,
     getProductDataByProductId: (Long) -> Product?,
     removeFromWishList: (String, Long) -> Unit,
     showSnackbarMessage: (String) -> Unit,
@@ -113,7 +111,7 @@ fun Wishlist(
     LazyColumn {
         items(wishlist.size) { index ->
             WishlistItem(
-                wishlistItemEntity = wishlist[index],
+                wishlistProduct = wishlist[index],
                 getProductDataByProductId = getProductDataByProductId,
                 removeFromWishList = removeFromWishList,
                 showSnackbarMessage = showSnackbarMessage,
@@ -126,14 +124,14 @@ fun Wishlist(
 
 @Composable
 fun WishlistItem(
-    wishlistItemEntity: WishlistItemEntity,
+    wishlistProduct: WishlistProduct,
     getProductDataByProductId: (Long) -> Product?,
     removeFromWishList: (String, Long) -> Unit,
     addToCart: (String, Long) -> Unit,
     showSnackbarMessage: (String) -> Unit,
     username: String
 ) {
-    val productId = wishlistItemEntity.productId
+    val productId = wishlistProduct.id
     val product = getProductDataByProductId(productId) ?: return
 
     ElevatedCard(
@@ -160,7 +158,7 @@ fun WishlistItem(
                 )
 
                 AddToCartButton(
-                    productname = product.name,
+                    productName = product.name,
                     addToCart = addToCart,
                     username = username,
                     productId = productId,
@@ -176,7 +174,6 @@ fun WishlistItem(
                 RemoveWishlistButton(
                     productname = product.name,
                     removeFromWishList = removeFromWishList,
-                    username = username,
                     productId = productId,
                     showSnackbarMessage = showSnackbarMessage
                 )
@@ -186,18 +183,17 @@ fun WishlistItem(
 }
 
 
-
 @Composable
 fun RemoveWishlistButton(
     productname: String,
     removeFromWishList: (String, Long) -> Unit,
-    username: String,
     productId: Long,
     showSnackbarMessage: (String) -> Unit
 ) {
+    val token = UserInfoManager.getInstance(LocalContext.current).getToken()!!
     Button(
         onClick = {
-            removeFromWishList(username, productId)
+            removeFromWishList(token, productId)
             showSnackbarMessage("Removed $productname from Wishlist!")
         },
         modifier = Modifier
@@ -229,7 +225,7 @@ fun RemoveWishlistButton(
 
 @Composable
 fun AddToCartButton(
-    productname: String,
+    productName: String,
     addToCart: (String, Long) -> Unit,
     username: String,
     productId: Long,
@@ -238,7 +234,7 @@ fun AddToCartButton(
     Button(
         onClick = {
             addToCart(username, productId)
-            showSnackbarMessage("Add $productname to Cart!")
+            showSnackbarMessage("Add $productName to Cart!")
         },
         modifier = Modifier
             .padding(8.dp)

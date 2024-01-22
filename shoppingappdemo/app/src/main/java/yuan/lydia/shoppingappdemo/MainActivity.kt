@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import yuan.lydia.shoppingappdemo.ui.screens.AppCanvas
+import yuan.lydia.shoppingappdemo.ui.screens.canvas.AppCanvas
 import yuan.lydia.shoppingappdemo.ui.theme.ShoppingappdemoTheme
 
 class MainActivity : ComponentActivity() {

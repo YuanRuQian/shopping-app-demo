@@ -17,6 +17,7 @@ import yuan.lydia.shoppingappdemo.network.userAuth.RegisterRequest
 import yuan.lydia.shoppingappdemo.network.userAuth.RegisterResponse
 import yuan.lydia.shoppingappdemo.network.userAuth.UserAuthRepository
 
+// TODO: refactor this, no more UiState, use live data instead
 sealed interface UiState {
     data class LoginSuccess(val response: LoginResponse) : UiState
 
@@ -35,7 +36,7 @@ sealed interface UiState {
 
 // TODO: retrofit login / register failure returns 403 (wrong password), throws error, cannot display the returned error message
 class UserAuthViewModel(
-    val userAuthRepository: UserAuthRepository
+    private val userAuthRepository: UserAuthRepository
 ) : ViewModel() {
     var uiState: UiState by mutableStateOf(UiState.Uninitialized)
 
@@ -51,7 +52,14 @@ class UserAuthViewModel(
                 UiState.LoginError(response)
             }
         } catch (e: retrofit2.HttpException) {
+            val errorCode = e.code()
+            val errorMessage = e.message()
+            val errorBody = e.response()?.errorBody()?.string()
             Log.d("UserAuthViewModel", "login network error: $e")
+            Log.d("UserAuthViewModel", "login network error code: $errorCode")
+            Log.d("UserAuthViewModel", "login network error message: $errorMessage")
+            Log.d("UserAuthViewModel", "login network error body: $errorBody")
+            // TODO: show exception message to user
             UiState.LoginNetworkError("Login failed, please check your username and password, and try again.")
         }
     }

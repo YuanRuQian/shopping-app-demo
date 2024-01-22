@@ -26,6 +26,9 @@ class CartWishlistManagementViewModel(private val cartWishlistManagementReposito
 
     val userWishlistLiveData: LiveData<List<WishlistItemEntity>> get() = _userWishlistLiveData
 
+    private val _checkoutSuccess = MutableLiveData<Boolean?>()
+    val checkoutSuccess: LiveData<Boolean?> get() = _checkoutSuccess
+
     fun loadUserCartData(username: String) {
         viewModelScope.launch {
             cartWishlistManagementRepository.loadUserCartData(username).collect {
@@ -88,24 +91,23 @@ class CartWishlistManagementViewModel(private val cartWishlistManagementReposito
     }
 
 
-    fun checkout(token: String, cartItems: List<CartItemEntity>): Boolean {
+    fun checkout(token: String, cartItems: List<CartItemEntity>) {
         val orderRequest = mapCartItemEntitiesToOrderRequest(cartItems)
-        var isSuccessful = false
         viewModelScope.launch {
             try {
                 val orderResponse = cartWishlistManagementRepository.submitOrder(token, orderRequest)
-                // TODO: handle error and show success message if success
                 if(orderResponse.success) {
-                    isSuccessful = true
+                    _checkoutSuccess.value = true
                     Log.d("CartWishlistManagementViewModel", "checkout success")
                 } else {
+                    _checkoutSuccess.value = false
                     Log.d("CartWishlistManagementViewModel", "checkout failed: ${orderResponse.message}")
                 }
             } catch (e: retrofit2.HttpException) {
+                _checkoutSuccess.value = false
                 Log.e("CartWishlistManagementViewModel", "checkout error: ${e.message()}")
             }
         }
-        return isSuccessful
     }
 
     fun clearUserCartAndReloadUserCartData(username: String) {

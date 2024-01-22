@@ -55,7 +55,8 @@ fun CartScreen(
     userCartDataLiveData: LiveData<List<CartItemEntity>>,
     updateQuantity: (String, Long, Int) -> Unit,
     showSnackbarMessage: (String) -> Unit,
-    checkout: (String, List<CartItemEntity>) -> Boolean,
+    checkout: (String, List<CartItemEntity>) -> Unit,
+    checkoutSuccessLiveData: LiveData<Boolean?>,
     onCheckoutSuccess: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -64,10 +65,17 @@ fun CartScreen(
     val token = userInfoManager.getToken()
     val userCartData by userCartDataLiveData.observeAsState()
     val productsData by productsLiveData.observeAsState()
+    val checkoutSuccessStatus by checkoutSuccessLiveData.observeAsState()
 
     if (username == null || token == null) {
         PlaceholderScreen("Please login to view cart!")
         return
+    }
+
+    if (checkoutSuccessStatus == true) {
+        onCheckoutSuccess(username)
+    } else if (checkoutSuccessStatus == false) {
+        showSnackbarMessage("Some of the products in your cart are out of stock, please remove them and try again")
     }
 
     LaunchedEffect(key1 = true) {
@@ -98,13 +106,10 @@ fun CartScreen(
             showSnackbarMessage = showSnackbarMessage,
             getProductDataByProductId = ::getProductDataByProductId,
             token = token,
-            username = username,
-            checkout = checkout,
-            onCheckoutSuccess = onCheckoutSuccess
+            checkout = checkout
         )
     }
 }
-
 
 
 @Composable
@@ -114,9 +119,7 @@ fun UserCart(
     showSnackbarMessage: (String) -> Unit,
     getProductDataByProductId: (Long) -> Product?,
     token: String,
-    username: String,
-    checkout: (String, List<CartItemEntity>) -> Boolean,
-    onCheckoutSuccess: (String) -> Unit
+    checkout: (String, List<CartItemEntity>) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
@@ -150,12 +153,7 @@ fun UserCart(
             )
             Button(
                 onClick = {
-                    val isSuccessful = checkout(token, userCartData)
-                    if (isSuccessful) {
-                        onCheckoutSuccess(username)
-                    } else {
-                        showSnackbarMessage("Some of the products in your cart are out of stock, please remove them and try again")
-                    }
+                    checkout(token, userCartData)
                 },
                 modifier = Modifier.padding(16.dp)
             ) {

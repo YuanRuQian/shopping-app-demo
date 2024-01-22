@@ -207,6 +207,7 @@ fun AppCanvas(
                         updateQuantity = cartWishlistManagementViewModel::updateQuantityThenReloadUserCartData,
                         showSnackbarMessage = snackbarViewModel::showSnackbar,
                         checkout = cartWishlistManagementViewModel::checkout,
+                        checkoutSuccessLiveData = cartWishlistManagementViewModel.checkoutSuccess,
                         onCheckoutSuccess = { username ->
                             cartWishlistManagementViewModel.clearUserCartAndReloadUserCartData(
                                 username

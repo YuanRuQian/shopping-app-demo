@@ -1,25 +1,19 @@
 package yuan.lydia.shoppingappdemo.ui.screens.canvas
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -34,7 +28,6 @@ fun navigationWithDestinationPreCheck(
     }
 }
 
-// TODO: highlight current screen button
 @Composable
 fun BottomNavigationBar(navController: NavController, isUserLoggedIn: Boolean) {
     if (!isUserLoggedIn) {
@@ -43,53 +36,36 @@ fun BottomNavigationBar(navController: NavController, isUserLoggedIn: Boolean) {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    BottomAppBar {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            BottomNavigationBarButton(
-                icon = Icons.Filled.Search,
-                text = AppRoute.Shopping.route,
+    var selectedItem by remember { mutableIntStateOf(0) }
+
+    val icons = listOf(
+        Icons.Default.Search,
+        Icons.Default.ShoppingCart,
+        Icons.Default.History,
+        Icons.Default.Favorite
+    )
+
+    val routes = listOf(
+        AppRoute.Shopping.route,
+        AppRoute.Cart.route,
+        AppRoute.History.route,
+        AppRoute.Wishlist.route
+    )
+
+    val zippedList = icons.zip(routes)
+
+
+    NavigationBar {
+        zippedList.forEachIndexed { index, (icon, route) ->
+            NavigationBarItem(
+                icon = { Icon(icon, contentDescription = route) },
+                label = { Text(route) },
+                selected = selectedItem == index,
                 onClick = {
+                    selectedItem = index
                     navigationWithDestinationPreCheck(
                         navController,
-                        AppRoute.Shopping.route,
-                        navBackStackEntry
-                    )
-                }
-            )
-            BottomNavigationBarButton(
-                icon = Icons.Filled.ShoppingCart,
-                text = AppRoute.Cart.route,
-                onClick = {
-                    navigationWithDestinationPreCheck(
-                        navController,
-                        AppRoute.Cart.route,
-                        navBackStackEntry
-                    )
-                }
-            )
-            BottomNavigationBarButton(
-                icon = Icons.Filled.History,
-                text = AppRoute.History.route,
-                onClick = {
-                    navigationWithDestinationPreCheck(
-                        navController,
-                        AppRoute.History.route,
-                        navBackStackEntry
-                    )
-                }
-            )
-            BottomNavigationBarButton(
-                icon = Icons.Filled.Favorite,
-                text = AppRoute.Wishlist.route,
-                onClick = {
-                    navigationWithDestinationPreCheck(
-                        navController,
-                        AppRoute.Wishlist.route,
+                        route,
                         navBackStackEntry
                     )
                 }
@@ -98,18 +74,3 @@ fun BottomNavigationBar(navController: NavController, isUserLoggedIn: Boolean) {
     }
 }
 
-@Composable
-fun BottomNavigationBarButton(icon: ImageVector, text: String, onClick: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        IconButton(onClick = { onClick() }) {
-            Icon(
-                icon,
-                contentDescription = text
-            )
-        }
-        Text(text)
-    }
-}

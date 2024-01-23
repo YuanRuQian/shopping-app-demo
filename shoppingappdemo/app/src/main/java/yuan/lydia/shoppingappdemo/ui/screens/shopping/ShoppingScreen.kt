@@ -312,7 +312,6 @@ fun ProductItem(
                                         colors = ExposedDropdownMenuDefaults.textFieldColors(),
                                         modifier = Modifier
                                             .padding(
-                                                start = 8.dp,
                                                 top = 8.dp,
                                                 end = 8.dp,
                                                 bottom = 8.dp

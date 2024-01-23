@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
@@ -16,8 +15,8 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.KeyboardType.Companion.Password
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -134,15 +132,15 @@ fun LoginScreen(
             Text(text = "Login")
         }
 
-        ClickableText(
+        TextButton(
             modifier = Modifier.testTag("registerText"),
-            text = AnnotatedString("Don't have an account? Click to register"),
             onClick = {
                 Log.d("LoginScreen", "navigate from login to register")
                 navigateToRegister()
-            },
-            style = MaterialTheme.typography.labelLarge
-        )
+            }) {
+            Text(text = "Don't have an account? Click here to register")
+        }
+
 
         when (val loginUiState = uiState ?: UiState.Uninitialized) {
             is UiState.LoginSuccess -> {

@@ -2,7 +2,6 @@ package yuan.lydia.shoppingappdemo
 
 import android.content.Context
 import android.view.inputmethod.InputMethodManager
-import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4

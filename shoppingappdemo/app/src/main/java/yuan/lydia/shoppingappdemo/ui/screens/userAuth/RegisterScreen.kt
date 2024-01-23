@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import yuan.lydia.shoppingappdemo.data.userAuth.UiState
 import yuan.lydia.shoppingappdemo.data.userAuth.UserAuthViewModel
+import yuan.lydia.shoppingappdemo.ui.common.isEmailValid
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -49,6 +50,7 @@ fun RegisterScreen(
     val userAuthViewModel: UserAuthViewModel = viewModel(factory = UserAuthViewModel.Factory)
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    val (isEmailValid, setIsEmailValid) = remember { mutableStateOf(true) }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     val (isRegisterButtonEnabled, setIsRegisterButtonEnabled) = remember { mutableStateOf(false) }
@@ -59,7 +61,7 @@ fun RegisterScreen(
 
     fun updateLoginButtonState() {
         setIsRegisterButtonEnabled(
-            username.isNotBlank() && email.isNotBlank() && password.isNotBlank()
+            username.isNotBlank() && email.isNotBlank() && password.isNotBlank() && isEmailValid
         )
     }
 
@@ -70,7 +72,6 @@ fun RegisterScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Username TextField
         TextField(
             value = username,
             onValueChange = {
@@ -90,15 +91,23 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.padding(16.dp))
 
-        // Username TextField
         TextField(
             value = email,
             onValueChange = {
                 email = it
+                setIsEmailValid(isEmailValid(email))
                 updateLoginButtonState()
             },
-            label = { Text(text = "Email") },
+            label = { Text(if (!isEmailValid) "Email*" else "Email") },
             singleLine = true,
+            supportingText = {
+                if (!isEmailValid) {
+                    Text(
+                        text = "Please enter a valid email address",
+                    )
+                }
+            },
+            isError = !isEmailValid,
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Email,

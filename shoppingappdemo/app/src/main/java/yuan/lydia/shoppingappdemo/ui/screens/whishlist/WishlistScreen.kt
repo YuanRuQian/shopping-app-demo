@@ -137,8 +137,17 @@ fun WishlistItem(
                 Text(
                     text = product.name,
                     fontWeight = FontWeight.Bold,
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                     modifier = Modifier
                         .padding(bottom = 8.dp)
+                )
+
+                Text(
+                    text = product.description,
+                    modifier = Modifier
+                        .padding(bottom = 8.dp),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize
                 )
 
                 AddToCartButton(

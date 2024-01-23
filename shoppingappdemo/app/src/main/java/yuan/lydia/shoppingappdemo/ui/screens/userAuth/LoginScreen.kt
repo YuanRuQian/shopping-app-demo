@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -28,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
@@ -39,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import yuan.lydia.shoppingappdemo.data.userAuth.UiState
 import yuan.lydia.shoppingappdemo.data.userAuth.UserAuthViewModel
-import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -52,13 +49,14 @@ fun LoginScreen(
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
-    var isLoginButtonEnabled by remember { mutableStateOf(false) }
+    val (isLoginButtonEnabled, setIsLoginButtonEnabled) = remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
-    val context = LocalContext.current
     val uiState by userAuthViewModel.uiState.observeAsState()
+    val (openAlertDialog, setOpenAlertDialog) = remember { mutableStateOf(false) }
+    val (alertDialogMessage, setAlertDialogMessage) = remember { mutableStateOf("") }
 
     fun updateLoginButtonState() {
-        isLoginButtonEnabled = username.isNotBlank() && password.isNotBlank()
+        setIsLoginButtonEnabled(username.isNotBlank() && password.isNotBlank())
     }
 
     Column(
@@ -141,53 +139,16 @@ fun LoginScreen(
             Text(text = "Don't have an account? Click here to register")
         }
 
-
-        when (val loginUiState = uiState ?: UiState.Uninitialized) {
-            is UiState.LoginSuccess -> {
-                LaunchedEffect(loginUiState.response.status.message) {
-                    isLoginButtonEnabled = true
-                    val userInfoManager = UserInfoManager.getInstance(context)
-                    userInfoManager.saveToken(loginUiState.response.token)
-                    userInfoManager.saveUsername(username)
-                    onLoginSuccess()
-                    showSnackBarMessage(loginUiState.response.status.message)
-                }
-            }
-
-            is UiState.LoginError -> {
-                LaunchedEffect(loginUiState.response.status.message) {
-                    showSnackBarMessage(loginUiState.response.status.message)
-                }
-                isLoginButtonEnabled = true
-            }
-
-            UiState.Loading -> {
-                isLoginButtonEnabled = false
-            }
-
-            UiState.Uninitialized -> {
-            }
-
-            is UiState.RegisterError -> {
-                LaunchedEffect(loginUiState.response.message) {
-                    showSnackBarMessage(loginUiState.response.message)
-                }
-                isLoginButtonEnabled = true
-            }
-
-            is UiState.RegisterNetworkError -> {
-                LaunchedEffect(loginUiState.message) {
-                    showSnackBarMessage(loginUiState.message)
-                }
-                isLoginButtonEnabled = true
-            }
-
-            is UiState.LoginNetworkError -> {
-                LaunchedEffect(loginUiState.message) {
-                    showSnackBarMessage(loginUiState.message)
-                }
-                isLoginButtonEnabled = true
-            }
-        }
+        UiStateChangeHandler(
+            openAlertDialog = openAlertDialog,
+            uiState = uiState ?: UiState.Uninitialized,
+            setOpenAlertDialog = setOpenAlertDialog,
+            alertDialogMessage = alertDialogMessage,
+            setIsButtonEnabled = setIsLoginButtonEnabled,
+            onLoginSuccess = onLoginSuccess,
+            showSnackBarMessage = showSnackBarMessage,
+            setAlertDialogMessage = setAlertDialogMessage,
+            username = username
+        )
     }
 }

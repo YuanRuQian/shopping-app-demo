@@ -9,10 +9,10 @@ fun extractErrorBody(e: retrofit2.HttpException): String {
     val errorMessage = e.message()
     val errorBody = e.response()?.errorBody()?.string()
 
-    Log.d("UserAuthViewModel", "network error: $e")
-    Log.d("UserAuthViewModel", "network error code: $errorCode")
-    Log.d("UserAuthViewModel", "network error message: $errorMessage")
-    Log.d("UserAuthViewModel", "network error body: $errorBody")
+    Log.d("extractErrorBody", "network error: $e")
+    Log.d("extractErrorBody", "network error code: $errorCode")
+    Log.d("extractErrorBody", "network error message: $errorMessage")
+    Log.d("extractErrorBody", "network error body: $errorBody")
 
     return errorBody?.let {
         try {

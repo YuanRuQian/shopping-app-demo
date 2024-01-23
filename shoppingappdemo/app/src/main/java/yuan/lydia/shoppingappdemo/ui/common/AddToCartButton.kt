@@ -31,10 +31,9 @@ fun AddToCartButton(
     product: Product,
     showSnackbarMessage: (String) -> Unit,
     setSelectedQuantity: (Int) -> Unit,
-    selectedQuantity: Int
+    selectedQuantity: Int,
+    username: String
 ) {
-    val context = LocalContext.current
-    val username = UserInfoManager.getInstance(context).getUsername() ?: return
     Button(
         onClick = {
             addToCart(

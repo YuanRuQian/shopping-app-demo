@@ -2,6 +2,7 @@ package yuan.lydia.shoppingappdemo
 
 import android.content.Context
 import android.view.inputmethod.InputMethodManager
+import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -101,8 +102,10 @@ class LoginScreenTest {
     }
 
     private fun isKeyboardShown(): Boolean {
-        val inputMethodManager = InstrumentationRegistry.getInstrumentation().targetContext.getSystemService(
-            Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val inputMethodManager =
+            InstrumentationRegistry.getInstrumentation().targetContext.getSystemService(
+                Context.INPUT_METHOD_SERVICE
+            ) as InputMethodManager
         return inputMethodManager.isAcceptingText
     }
 

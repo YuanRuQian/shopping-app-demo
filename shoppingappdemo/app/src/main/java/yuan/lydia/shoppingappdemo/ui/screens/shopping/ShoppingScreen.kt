@@ -238,6 +238,10 @@ fun ProductItem(
     var expanded by remember { mutableStateOf(false) }
     val (selectedQuantity, setSelectedQuantity) = remember { mutableIntStateOf(1) }
 
+    val context = LocalContext.current
+    val token = UserInfoManager.getInstance(context).getToken() ?: return
+    val username = UserInfoManager.getInstance(context).getUsername() ?: return
+
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -337,7 +341,6 @@ fun ProductItem(
                     }
                 }
 
-
                 Column(
                     modifier = Modifier
                         .weight(0.4f)
@@ -348,7 +351,8 @@ fun ProductItem(
                         product = product,
                         showSnackbarMessage = showSnackbarMessage,
                         setSelectedQuantity = setSelectedQuantity,
-                        selectedQuantity = selectedQuantity
+                        selectedQuantity = selectedQuantity,
+                        username = username
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     WishlistButton(
@@ -357,7 +361,8 @@ fun ProductItem(
                         addToWishList = addToWishList,
                         removeFromWishList = removeFromWishList,
                         productId = product.id,
-                        showSnackbarMessage = showSnackbarMessage
+                        showSnackbarMessage = showSnackbarMessage,
+                        token = token
                     )
                 }
             }

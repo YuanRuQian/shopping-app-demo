@@ -115,6 +115,8 @@ fun WishlistItem(
 ) {
     val productId = wishlistProduct.id
     val product = getProductDataByProductId(productId) ?: return
+    val context = LocalContext.current
+    val username = UserInfoManager.getInstance(context).getUsername() ?: return
 
     ElevatedCard(
         modifier = Modifier
@@ -144,7 +146,8 @@ fun WishlistItem(
                     product = product,
                     showSnackbarMessage = showSnackbarMessage,
                     setSelectedQuantity = {},
-                    selectedQuantity = 1
+                    selectedQuantity = 1,
+                    username = username
                 )
             }
 
@@ -172,12 +175,15 @@ fun RemoveWishlistButton(
     productId: Long,
     showSnackbarMessage: (String) -> Unit
 ) {
+    val context = LocalContext.current
+    val token = UserInfoManager.getInstance(context).getToken() ?: return
     WishlistButton(
         productName = productname,
         isInWishlist = true,
         addToWishList = { _, _, _, _ -> },
         removeFromWishList = removeFromWishList,
         productId = productId,
-        showSnackbarMessage = showSnackbarMessage
+        showSnackbarMessage = showSnackbarMessage,
+        token = token
     )
 }

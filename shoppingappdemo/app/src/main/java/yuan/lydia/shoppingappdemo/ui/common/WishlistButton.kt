@@ -19,10 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 
 @Composable
 fun WishlistButton(
@@ -31,10 +30,9 @@ fun WishlistButton(
     addToWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
     removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
     productId: Long,
-    showSnackbarMessage: (String) -> Unit
+    showSnackbarMessage: (String) -> Unit,
+    token: String
 ) {
-    val context = LocalContext.current
-    val token = UserInfoManager.getInstance(context).getToken() ?: return
     Button(
         onClick = {
             if (isInWishlist) {
@@ -67,7 +65,7 @@ fun WishlistButton(
             .background(
                 MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(8.dp)
-            )
+            ).testTag("wishlistButton")
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -77,9 +75,10 @@ fun WishlistButton(
             Icon(
                 imageVector = if (isInWishlist) Icons.Default.HeartBroken else Icons.Default.Favorite,
                 contentDescription = null,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp).testTag("wishlistButtonIcon")
             )
             Text(
+                modifier = Modifier.testTag("wishlistButtonText"),
                 text = if (isInWishlist) "Remove from Wishlist" else "Add to Wishlist",
                 textAlign = TextAlign.Center
             )

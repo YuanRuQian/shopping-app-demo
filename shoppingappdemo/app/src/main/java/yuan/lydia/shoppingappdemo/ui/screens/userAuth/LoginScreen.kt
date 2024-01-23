@@ -56,6 +56,8 @@ fun LoginScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
     val uiState by userAuthViewModel.uiState.observeAsState()
+    val (openAlertDialog, setOpenAlertDialog) = remember { mutableStateOf(false) }
+    val (alertDialogMessage, setAlertDialogMessage) = remember { mutableStateOf("") }
 
     fun updateLoginButtonState() {
         isLoginButtonEnabled = username.isNotBlank() && password.isNotBlank()
@@ -141,6 +143,14 @@ fun LoginScreen(
             Text(text = "Don't have an account? Click here to register")
         }
 
+        when(openAlertDialog) {
+            true -> {
+                LoginFailureDialog(
+                    onDismissRequest = { setOpenAlertDialog(false) },
+                    errorMessage = "Login failed, please try again")
+            }
+            else -> {}
+        }
 
         when (val loginUiState = uiState ?: UiState.Uninitialized) {
             is UiState.LoginSuccess -> {
@@ -156,7 +166,8 @@ fun LoginScreen(
 
             is UiState.LoginError -> {
                 LaunchedEffect(loginUiState.response.status.message) {
-                    showSnackBarMessage(loginUiState.response.status.message)
+                    setAlertDialogMessage(loginUiState.response.status.message)
+                    setOpenAlertDialog(true)
                 }
                 isLoginButtonEnabled = true
             }
@@ -170,21 +181,24 @@ fun LoginScreen(
 
             is UiState.RegisterError -> {
                 LaunchedEffect(loginUiState.response.message) {
-                    showSnackBarMessage(loginUiState.response.message)
+                    setAlertDialogMessage(loginUiState.response.message)
+                    setOpenAlertDialog(true)
                 }
                 isLoginButtonEnabled = true
             }
 
             is UiState.RegisterNetworkError -> {
                 LaunchedEffect(loginUiState.message) {
-                    showSnackBarMessage(loginUiState.message)
+                    setAlertDialogMessage(loginUiState.message)
+                    setOpenAlertDialog(true)
                 }
                 isLoginButtonEnabled = true
             }
 
             is UiState.LoginNetworkError -> {
                 LaunchedEffect(loginUiState.message) {
-                    showSnackBarMessage(loginUiState.message)
+                    setAlertDialogMessage(loginUiState.message)
+                    setOpenAlertDialog(true)
                 }
                 isLoginButtonEnabled = true
             }

@@ -32,16 +32,16 @@ class CartViewModel(private val cartRepository: CartRepository) :
         }
     }
 
-    fun addToCart(username: String, productId: Long) {
-        viewModelScope.launch {
-            cartRepository.increaseQuantity(username, productId, 1)
-        }
-    }
-
     fun updateQuantityThenReloadUserCartData(username: String, productId: Long, newQuantity: Int) {
         viewModelScope.launch {
             cartRepository.updateQuantity(username, productId, newQuantity)
             loadUserCartData(username)
+        }
+    }
+
+    fun increaseQuantity(username: String, productId: Long, addedQuantity: Int) {
+        viewModelScope.launch {
+            cartRepository.increaseQuantity(username, productId, addedQuantity)
         }
     }
 

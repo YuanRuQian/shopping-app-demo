@@ -140,7 +140,7 @@ fun AppCanvas(
                             shoppingViewModel.getProducts(it)
                         },
                         products = products,
-                        increaseQuantity = cartViewModel::increaseQuantityThenReloadUserCartData,
+                        addToCart = cartViewModel::increaseQuantityThenReloadUserCartData,
                         showSnackbarMessage = snackbarViewModel::showSnackbar,
                         addToWishList = wishlistViewModel::addToWishlistAndReloadWishlistData,
                         removeFromWishList = wishlistViewModel::removeFromWishlistAndReloadWishlistData,
@@ -190,7 +190,7 @@ fun AppCanvas(
                         productsData = products,
                         removeFromWishList = wishlistViewModel::removeFromWishlistAndReloadWishlistData,
                         showSnackbarMessage = snackbarViewModel::showSnackbar,
-                        addToCart = cartViewModel::addToCart
+                        addToCart = cartViewModel::increaseQuantity
                     )
                 }
 

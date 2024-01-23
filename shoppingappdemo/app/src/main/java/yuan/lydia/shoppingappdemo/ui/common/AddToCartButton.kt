@@ -10,8 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.HeartBroken
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,43 +22,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
+import yuan.lydia.shoppingappdemo.network.shopping.Product
+
 
 @Composable
-fun WishlistButton(
-    productName: String,
-    isInWishlist: Boolean,
-    addToWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
-    removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
-    productId: Long,
-    showSnackbarMessage: (String) -> Unit
+fun AddToCartButton(
+    addToCart: (String, Long, Int) -> Unit,
+    product: Product,
+    showSnackbarMessage: (String) -> Unit,
+    setSelectedQuantity: (Int) -> Unit,
+    selectedQuantity: Int
 ) {
     val context = LocalContext.current
-    val token = UserInfoManager.getInstance(context).getToken() ?: return
+    val username = UserInfoManager.getInstance(context).getUsername() ?: return
     Button(
         onClick = {
-            if (isInWishlist) {
-                removeFromWishList(
-                    token,
-                    productId,
-                    {
-                        showSnackbarMessage("Removed $productName from wishlist!")
-                    },
-                    {
-                        showSnackbarMessage(it)
-                    }
-                )
-            } else {
-                addToWishList(
-                    token,
-                    productId,
-                    {
-                        showSnackbarMessage("Added $productName to wishlist!")
-                    },
-                    {
-                        showSnackbarMessage(it)
-                    }
-                )
-            }
+            addToCart(
+                username,
+                product.id,
+                selectedQuantity
+            )
+            showSnackbarMessage("Added $selectedQuantity ${product.name} to cart!")
+            setSelectedQuantity(1)
         },
         modifier = Modifier
             .padding(8.dp)
@@ -72,15 +56,15 @@ fun WishlistButton(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth() // Center the entire column horizontally
         ) {
             Icon(
-                imageVector = if (isInWishlist) Icons.Default.HeartBroken else Icons.Default.Favorite,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
+                imageVector = Icons.Default.ShoppingCart,
+                contentDescription = null, // Content description can be null if the icon is decorative
+                modifier = Modifier.size(24.dp) // Optional: Adjust size as needed
             )
             Text(
-                text = if (isInWishlist) "Remove from Wishlist" else "Add to Wishlist",
+                text = "Add to Cart",
                 textAlign = TextAlign.Center
             )
         }

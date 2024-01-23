@@ -1,23 +1,14 @@
 package yuan.lydia.shoppingappdemo.ui.screens.whishlist
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,10 +17,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
+import yuan.lydia.shoppingappdemo.ui.common.AddToCartButton
 import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
 import yuan.lydia.shoppingappdemo.ui.common.WishlistButton
 import yuan.lydia.shoppingappdemo.network.wishlist.Product as WishlistProduct
@@ -41,7 +32,7 @@ fun WishlistScreen(
     productsData: List<Product>?,
     removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
     showSnackbarMessage: (String) -> Unit,
-    addToCart: (String, Long) -> Unit
+    addToCart: (String, Long, Int) -> Unit
 ) {
 
     Column(
@@ -75,7 +66,6 @@ fun WishlistScreen(
             getProductDataByProductId = ::getProductDataByProductId,
             removeFromWishList = removeFromWishList,
             showSnackbarMessage = showSnackbarMessage,
-            username = username,
             addToCart = addToCart
         )
     }
@@ -87,8 +77,7 @@ fun Wishlist(
     getProductDataByProductId: (Long) -> Product?,
     removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
     showSnackbarMessage: (String) -> Unit,
-    username: String,
-    addToCart: (String, Long) -> Unit
+    addToCart: (String, Long, Int) -> Unit
 ) {
     if (wishlist.isEmpty()) {
         Box(
@@ -109,9 +98,8 @@ fun Wishlist(
                 wishlistProduct = wishlist[index],
                 getProductDataByProductId = getProductDataByProductId,
                 removeFromWishList = removeFromWishList,
-                showSnackbarMessage = showSnackbarMessage,
-                username = username,
-                addToCart = addToCart
+                addToCart = addToCart,
+                showSnackbarMessage = showSnackbarMessage
             )
         }
     }
@@ -119,12 +107,11 @@ fun Wishlist(
 
 @Composable
 fun WishlistItem(
-    wishlistProduct: WishlistProduct,
+    wishlistProduct: yuan.lydia.shoppingappdemo.network.wishlist.Product,
     getProductDataByProductId: (Long) -> Product?,
     removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
-    addToCart: (String, Long) -> Unit,
-    showSnackbarMessage: (String) -> Unit,
-    username: String
+    addToCart: (String, Long, Int) -> Unit,
+    showSnackbarMessage: (String) -> Unit
 ) {
     val productId = wishlistProduct.id
     val product = getProductDataByProductId(productId) ?: return
@@ -153,11 +140,11 @@ fun WishlistItem(
                 )
 
                 AddToCartButton(
-                    productName = product.name,
                     addToCart = addToCart,
-                    username = username,
-                    productId = productId,
-                    showSnackbarMessage = showSnackbarMessage
+                    product = product,
+                    showSnackbarMessage = showSnackbarMessage,
+                    setSelectedQuantity = {},
+                    selectedQuantity = 1
                 )
             }
 
@@ -193,44 +180,4 @@ fun RemoveWishlistButton(
         productId = productId,
         showSnackbarMessage = showSnackbarMessage
     )
-}
-
-
-@Composable
-fun AddToCartButton(
-    productName: String,
-    addToCart: (String, Long) -> Unit,
-    username: String,
-    productId: Long,
-    showSnackbarMessage: (String) -> Unit
-) {
-    Button(
-        onClick = {
-            addToCart(username, productId)
-            showSnackbarMessage("Add $productName to Cart!")
-        },
-        modifier = Modifier
-            .padding(8.dp)
-            .height(IntrinsicSize.Min) // Optional: Ensure the button height is not too tall
-            .background(
-                MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(8.dp)
-            ) // Adjust the corner radius as needed
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth() // Center the entire column horizontally
-        ) {
-            Icon(
-                imageVector = Icons.Default.ShoppingCart,
-                contentDescription = null, // Content description can be null if the icon is decorative
-                modifier = Modifier.size(24.dp) // Optional: Adjust size as needed
-            )
-            Text(
-                text = "Add to Cart",
-                textAlign = TextAlign.Center
-            )
-        }
-    }
 }

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material3.Button
@@ -16,9 +15,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import yuan.lydia.shoppingappdemo.data.cart.database.CartItemEntity
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.shopping.Product
+import yuan.lydia.shoppingappdemo.ui.common.FailureDialog
 import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
 
 @Composable
@@ -37,8 +38,7 @@ fun CartScreen(
     userCartData: List<CartItemEntity>?,
     updateQuantity: (String, Long, Int) -> Unit,
     showSnackbarMessage: (String) -> Unit,
-    checkout: (String, List<CartItemEntity>) -> Unit,
-    checkoutSuccessStatus: Boolean?,
+    checkout: (String, String, List<CartItemEntity>, (String) -> Unit, (String) -> Unit) -> Unit,
     onCheckoutSuccess: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -50,12 +50,6 @@ fun CartScreen(
     if (username == null || token == null) {
         PlaceholderScreen("Please login to view cart!")
         return
-    }
-
-    if (checkoutSuccessStatus == true) {
-        onCheckoutSuccess(username)
-    } else if (checkoutSuccessStatus == false) {
-        showSnackbarMessage("Some of the products in your cart are out of stock, please remove them and try again")
     }
 
     LaunchedEffect(key1 = true) {
@@ -86,7 +80,9 @@ fun CartScreen(
             showSnackbarMessage = showSnackbarMessage,
             getProductDataByProductId = ::getProductDataByProductId,
             token = token,
-            checkout = checkout
+            username = username,
+            checkout = checkout,
+            onCheckoutSuccess = onCheckoutSuccess
         )
     }
 }
@@ -99,8 +95,25 @@ fun UserCart(
     showSnackbarMessage: (String) -> Unit,
     getProductDataByProductId: (Long) -> Product?,
     token: String,
-    checkout: (String, List<CartItemEntity>) -> Unit
+    username: String,
+    checkout: (String, String, List<CartItemEntity>, (String) -> Unit, (String) -> Unit) -> Unit,
+    onCheckoutSuccess: (String) -> Unit
 ) {
+
+    val (openAlertDialog, setOpenAlertDialog) = remember { mutableStateOf(false) }
+    val (alertDialogMessage, setAlertDialogMessage) = remember { mutableStateOf("") }
+
+    when (openAlertDialog) {
+        true -> {
+            FailureDialog(
+                onDismissRequest = { setOpenAlertDialog(false) },
+                errorMessage = alertDialogMessage
+            )
+        }
+
+        else -> {}
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
             items(userCartData.size) { index ->
@@ -140,7 +153,12 @@ fun UserCart(
 
             Button(
                 onClick = {
-                    checkout(token, userCartData)
+                    checkout(
+                        token, username, userCartData, onCheckoutSuccess
+                    ) { message ->
+                        setAlertDialogMessage(message)
+                        setOpenAlertDialog(true)
+                    }
                 },
                 modifier = Modifier.padding(16.dp)
             ) {
@@ -155,7 +173,6 @@ fun UserCart(
                 }
             }
         }
-
     }
 }
 

@@ -14,15 +14,13 @@ import yuan.lydia.shoppingappdemo.data.cart.database.CartItemEntity
 import yuan.lydia.shoppingappdemo.data.cart.repository.CartRepository
 import yuan.lydia.shoppingappdemo.network.cart.Order
 import yuan.lydia.shoppingappdemo.network.cart.OrderRequest
+import yuan.lydia.shoppingappdemo.network.extractErrorBody
 
 class CartViewModel(private val cartRepository: CartRepository) :
     ViewModel() {
 
     private val _userCartLiveData = MutableLiveData<List<CartItemEntity>>()
     val userCartLiveData: LiveData<List<CartItemEntity>> get() = _userCartLiveData
-
-    private val _checkoutSuccess = MutableLiveData<Boolean?>()
-    val checkoutSuccess: LiveData<Boolean?> get() = _checkoutSuccess
 
     fun loadUserCartData(username: String) {
         viewModelScope.launch {
@@ -68,25 +66,31 @@ class CartViewModel(private val cartRepository: CartRepository) :
     }
 
 
-    fun checkout(token: String, cartItems: List<CartItemEntity>) {
+    fun checkout(
+        token: String,
+        username: String,
+        cartItems: List<CartItemEntity>,
+        onCheckoutSuccess: (String) -> Unit,
+        onCheckoutFailure: (String) -> Unit
+    ) {
         val orderRequest = mapCartItemEntitiesToOrderRequest(cartItems)
         viewModelScope.launch {
             try {
                 val orderResponse =
                     cartRepository.submitOrder(token, orderRequest)
                 if (orderResponse.success) {
-                    _checkoutSuccess.value = true
+                    onCheckoutSuccess(username)
                     Log.d("CartWishlistManagementViewModel", "checkout success")
                 } else {
-                    _checkoutSuccess.value = false
                     Log.d(
                         "CartWishlistManagementViewModel",
                         "checkout failed: ${orderResponse.message}"
                     )
+                    onCheckoutFailure(orderResponse.message)
                 }
             } catch (e: retrofit2.HttpException) {
-                _checkoutSuccess.value = false
                 Log.e("CartWishlistManagementViewModel", "checkout error: ${e.message()}")
+                onCheckoutFailure(extractErrorBody(e))
             }
         }
     }

@@ -53,7 +53,6 @@ fun AppCanvas(
     val products by shoppingViewModel.filteredProducts.observeAsState()
     val wishlist by wishlistViewModel.wishlist.observeAsState()
     val userCart by cartViewModel.userCartLiveData.observeAsState()
-    val cartCheckOutSuccessStatus by cartViewModel.checkoutSuccess.observeAsState()
     val orderHistory by historyViewModel.orderHistory.observeAsState()
     val currentOrderDetails by historyViewModel.currentOrderDetails.observeAsState()
 
@@ -160,7 +159,6 @@ fun AppCanvas(
                         updateQuantity = cartViewModel::updateQuantityThenReloadUserCartData,
                         showSnackbarMessage = snackbarViewModel::showSnackbar,
                         checkout = cartViewModel::checkout,
-                        checkoutSuccessStatus = cartCheckOutSuccessStatus,
                         onCheckoutSuccess = { username ->
                             cartViewModel.clearUserCartAndReloadUserCartData(
                                 username

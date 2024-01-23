@@ -1,4 +1,4 @@
-package yuan.lydia.shoppingappdemo.ui.screens.userAuth
+package yuan.lydia.shoppingappdemo.ui.common
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
@@ -9,7 +9,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 
 @Composable
-fun LoginFailureDialog(
+fun FailureDialog(
     onDismissRequest: () -> Unit,
     errorMessage: String
 ) {
@@ -26,7 +26,7 @@ fun LoginFailureDialog(
             }
         },
         icon = {
-            Icon(imageVector = Icons.Default.Error, contentDescription = null)
+            Icon(imageVector = Icons.Default.Error, contentDescription = errorMessage)
         }
     )
 }

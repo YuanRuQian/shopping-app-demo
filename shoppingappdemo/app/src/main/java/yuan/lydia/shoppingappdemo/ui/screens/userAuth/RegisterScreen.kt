@@ -20,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -29,17 +28,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.KeyboardType.Companion.Password
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import yuan.lydia.shoppingappdemo.data.userAuth.UiState
 import yuan.lydia.shoppingappdemo.data.userAuth.UserAuthViewModel
-import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -53,14 +51,16 @@ fun RegisterScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
-    var isRegisterButtonEnabled by remember { mutableStateOf(false) }
+    val (isRegisterButtonEnabled, setIsRegisterButtonEnabled) = remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
-    val context = LocalContext.current
     val uiState by userAuthViewModel.uiState.observeAsState()
+    val (openAlertDialog, setOpenAlertDialog) = remember { mutableStateOf(false) }
+    val (alertDialogMessage, setAlertDialogMessage) = remember { mutableStateOf("") }
 
     fun updateLoginButtonState() {
-        isRegisterButtonEnabled =
+        setIsRegisterButtonEnabled(
             username.isNotBlank() && email.isNotBlank() && password.isNotBlank()
+        )
     }
 
     Column(
@@ -120,7 +120,7 @@ fun RegisterScreen(
             label = { Text("Password") },
             visualTransformation =
             if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            keyboardOptions = KeyboardOptions(keyboardType = Password),
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Lock,
@@ -131,7 +131,6 @@ fun RegisterScreen(
                 IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                     val visibilityIcon =
                         if (isPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
-                    // Please provide localized description for accessibility services
                     val description =
                         if (isPasswordVisible) "Hide password" else "Show password"
                     Icon(imageVector = visibilityIcon, contentDescription = description)
@@ -163,52 +162,16 @@ fun RegisterScreen(
             Text(text = "Already have an account? Click here to login")
         }
 
-        when (val registerUiState = uiState?: UiState.Uninitialized) {
-            is UiState.LoginSuccess -> {
-                LaunchedEffect(registerUiState.response.status.message) {
-                    isRegisterButtonEnabled = true
-                    val userInfoManager = UserInfoManager.getInstance(context)
-                    userInfoManager.saveToken(registerUiState.response.token)
-                    userInfoManager.saveUsername(username)
-                    onLoginSuccess()
-                    showSnackBarMessage(registerUiState.response.status.message)
-                }
-            }
-
-            is UiState.LoginError -> {
-                LaunchedEffect(registerUiState.response.status.message) {
-                    showSnackBarMessage(registerUiState.response.status.message)
-                }
-                isRegisterButtonEnabled = true
-            }
-
-            UiState.Loading -> {
-                isRegisterButtonEnabled = false
-            }
-
-            UiState.Uninitialized -> {
-            }
-
-            is UiState.RegisterError -> {
-                LaunchedEffect(registerUiState.response.message) {
-                    showSnackBarMessage(registerUiState.response.message)
-                }
-                isRegisterButtonEnabled = true
-            }
-
-            is UiState.RegisterNetworkError -> {
-                LaunchedEffect(registerUiState.message) {
-                    showSnackBarMessage(registerUiState.message)
-                }
-                isRegisterButtonEnabled = true
-            }
-
-            is UiState.LoginNetworkError -> {
-                LaunchedEffect(registerUiState.message) {
-                    showSnackBarMessage(registerUiState.message)
-                }
-                isRegisterButtonEnabled = true
-            }
-        }
+        UiStateChangeHandler(
+            openAlertDialog = openAlertDialog,
+            uiState = uiState ?: UiState.Uninitialized,
+            setOpenAlertDialog = setOpenAlertDialog,
+            alertDialogMessage = alertDialogMessage,
+            setIsButtonEnabled = setIsRegisterButtonEnabled,
+            onLoginSuccess = onLoginSuccess,
+            showSnackBarMessage = showSnackBarMessage,
+            setAlertDialogMessage = setAlertDialogMessage,
+            username = username
+        )
     }
 }

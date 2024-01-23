@@ -3,7 +3,11 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
     id("com.google.devtools.ksp")
-    jacoco
+    id("jacoco")
+}
+
+jacoco {
+    toolVersion = "0.8.11"
 }
 
 // TODO: use jacoco for code coverage report
@@ -26,6 +30,7 @@ android {
     }
 
     buildTypes {
+
         release {
             isMinifyEnabled = false
             proguardFiles(

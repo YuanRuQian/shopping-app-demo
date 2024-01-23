@@ -185,7 +185,6 @@ fun AppCanvas(
                     WishlistScreen(
                         loadWishlistData = wishlistViewModel::loadWishlist,
                         wishlist = wishlist,
-                        productsData = products,
                         removeFromWishList = wishlistViewModel::removeFromWishlistAndReloadWishlistData,
                         showSnackbarMessage = snackbarViewModel::showSnackbar,
                         addToCart = cartViewModel::increaseQuantity

@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import yuan.lydia.shoppingappdemo.data.cart.database.CartItemEntity
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
-import yuan.lydia.shoppingappdemo.network.shopping.Product
+import yuan.lydia.shoppingappdemo.network.common.Product
 import yuan.lydia.shoppingappdemo.ui.common.FailureDialog
 import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
 

@@ -34,7 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import yuan.lydia.shoppingappdemo.data.cart.database.CartItemEntity
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
-import yuan.lydia.shoppingappdemo.network.shopping.Product
+import yuan.lydia.shoppingappdemo.network.common.Product
 
 @Composable
 fun CartItem(

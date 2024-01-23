@@ -10,7 +10,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.ShoppingApplication
-import yuan.lydia.shoppingappdemo.network.shopping.Product
+import yuan.lydia.shoppingappdemo.network.common.Product
 import yuan.lydia.shoppingappdemo.network.shopping.ShoppingRepository
 import yuan.lydia.shoppingappdemo.ui.screens.shopping.FilterType
 

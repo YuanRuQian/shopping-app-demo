@@ -1,5 +1,7 @@
 package yuan.lydia.shoppingappdemo.network.history
 
+import yuan.lydia.shoppingappdemo.network.common.Product
+
 data class OrderDetailsResponse(
     val status: OrderStatus,
     val order: OrderDetail,
@@ -22,11 +24,4 @@ data class OrderItem(
     val product: Product,
     val purchasedPrice: Double,
     val quantity: Long,
-)
-
-data class Product(
-    val id: Long,
-    val name: String,
-    val description: String,
-    val retailPrice: Double,
 )

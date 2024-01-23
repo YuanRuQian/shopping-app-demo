@@ -10,10 +10,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.launch
 import yuan.lydia.shoppingappdemo.ShoppingApplication
+import yuan.lydia.shoppingappdemo.network.common.Product
 import yuan.lydia.shoppingappdemo.network.extractErrorBody
 import yuan.lydia.shoppingappdemo.network.wishlist.AddToWishlistResponse
 import yuan.lydia.shoppingappdemo.network.wishlist.DeleteFromWishlistResponse
-import yuan.lydia.shoppingappdemo.network.wishlist.Product
 import yuan.lydia.shoppingappdemo.network.wishlist.WishlistRepository
 
 sealed interface AddToWishListUiState {

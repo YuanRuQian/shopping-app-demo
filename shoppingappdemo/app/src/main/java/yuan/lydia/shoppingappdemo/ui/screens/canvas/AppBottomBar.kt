@@ -9,7 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingBasket
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,6 +34,7 @@ fun navigationWithDestinationPreCheck(
     }
 }
 
+// TODO: highlight current screen button
 @Composable
 fun BottomNavigationBar(navController: NavController, isUserLoggedIn: Boolean) {
     if (!isUserLoggedIn) {
@@ -61,7 +62,7 @@ fun BottomNavigationBar(navController: NavController, isUserLoggedIn: Boolean) {
                 }
             )
             BottomNavigationBarButton(
-                icon = Icons.Filled.ShoppingBasket,
+                icon = Icons.Filled.ShoppingCart,
                 text = AppRoute.Cart.route,
                 onClick = {
                     navigationWithDestinationPreCheck(

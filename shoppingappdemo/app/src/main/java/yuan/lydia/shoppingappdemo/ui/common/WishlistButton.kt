@@ -63,7 +63,7 @@ fun WishlistButton(
             .padding(8.dp)
             .height(IntrinsicSize.Min)
             .background(
-                MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(8.dp)
             ).testTag("wishlistButton")
     ) {

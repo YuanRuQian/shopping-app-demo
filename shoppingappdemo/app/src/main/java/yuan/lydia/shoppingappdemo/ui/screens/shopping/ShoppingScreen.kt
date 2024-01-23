@@ -250,6 +250,7 @@ fun ProductItem(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(vertical = 8.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -346,15 +347,6 @@ fun ProductItem(
                         .weight(0.4f)
                         .padding(horizontal = 16.dp)
                 ) {
-                    AddToCartButton(
-                        addToCart = increaseQuantity,
-                        product = product,
-                        showSnackbarMessage = showSnackbarMessage,
-                        setSelectedQuantity = setSelectedQuantity,
-                        selectedQuantity = selectedQuantity,
-                        username = username
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
                     WishlistButton(
                         productName = product.name,
                         isInWishlist = ifProductIsInWishlist(product.id),
@@ -363,6 +355,15 @@ fun ProductItem(
                         productId = product.id,
                         showSnackbarMessage = showSnackbarMessage,
                         token = token
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AddToCartButton(
+                        addToCart = increaseQuantity,
+                        product = product,
+                        showSnackbarMessage = showSnackbarMessage,
+                        setSelectedQuantity = setSelectedQuantity,
+                        selectedQuantity = selectedQuantity,
+                        username = username
                     )
                 }
             }

@@ -1,4 +1,4 @@
-package yuan.lydia.shoppingappdemo.ui.common
+package yuan.lydia.shoppingappdemo.ui.screens.shopping
 
 import android.util.Log
 import androidx.compose.foundation.clickable
@@ -32,6 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.common.Product
+import yuan.lydia.shoppingappdemo.ui.common.AddToCartButton
+import yuan.lydia.shoppingappdemo.ui.common.WishlistButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +44,6 @@ fun ProductItemCard(
     addToWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
     removeFromWishList: (String, Long, () -> Unit, (String) -> Unit) -> Unit,
     ifProductIsInWishlist: (Long) -> Boolean,
-    wishlistMode: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(false) }
     val (selectedQuantity, setSelectedQuantity) = remember { mutableIntStateOf(1) }
@@ -69,7 +70,6 @@ fun ProductItemCard(
                 text = product.description,
                 modifier = Modifier.padding(top = 4.dp),
                 color = MaterialTheme.colorScheme.secondary,
-                fontSize = MaterialTheme.typography.bodySmall.fontSize
             )
 
             Text(
@@ -77,62 +77,60 @@ fun ProductItemCard(
                 modifier = Modifier.padding(top = 4.dp)
             )
 
-            if (!wishlistMode) {
-                Row(
-                    modifier = Modifier
-                        .clickable {
-                            expanded = !expanded
-                            Log.d("ProductItem", "ProductItem: clicked")
-                        }
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it }) {
-                        CompositionLocalProvider(LocalTextInputService provides null) {
-                            Row(
+            Row(
+                modifier = Modifier
+                    .clickable {
+                        expanded = !expanded
+                        Log.d("ProductItem", "ProductItem: clicked")
+                    }
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it }) {
+                    CompositionLocalProvider(LocalTextInputService provides null) {
+                        Row(
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            TextField(
+                                readOnly = true,
+                                value = selectedQuantity.toString(),
+                                onValueChange = {},
+                                prefix = { Text("Quantity:") },
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                        expanded = expanded
+                                    )
+                                },
+                                colors = ExposedDropdownMenuDefaults.textFieldColors(),
                                 modifier = Modifier
+                                    .padding(
+                                        top = 8.dp,
+                                        end = 8.dp,
+                                        bottom = 8.dp
+                                    ) // Adjust padding as needed
                                     .menuAnchor()
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
+                            )
+
+
+                            ExposedDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
                             ) {
-
-                                TextField(
-                                    readOnly = true,
-                                    value = selectedQuantity.toString(),
-                                    onValueChange = {},
-                                    prefix = { Text("Quantity:") },
-                                    trailingIcon = {
-                                        ExposedDropdownMenuDefaults.TrailingIcon(
-                                            expanded = expanded
+                                for (quantity in 1..10) run {
+                                    DropdownMenuItem(text = {
+                                        Text(
+                                            text = quantity.toString(),
                                         )
-                                    },
-                                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                                    modifier = Modifier
-                                        .padding(
-                                            top = 8.dp,
-                                            end = 8.dp,
-                                            bottom = 8.dp
-                                        ) // Adjust padding as needed
-                                        .menuAnchor()
-                                )
-
-
-                                ExposedDropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { expanded = false },
-                                ) {
-                                    for (quantity in 1..10) run {
-                                        DropdownMenuItem(text = {
-                                            Text(
-                                                text = quantity.toString(),
-                                            )
-                                        }, onClick = {
-                                            setSelectedQuantity(quantity)
-                                            expanded = false
-                                        })
-                                    }
+                                    }, onClick = {
+                                        setSelectedQuantity(quantity)
+                                        expanded = false
+                                    })
                                 }
                             }
                         }
@@ -156,7 +154,7 @@ fun ProductItemCard(
                 selectedQuantity = selectedQuantity,
                 username = username,
                 modifier = sharedModifier.weight(5f),
-                isOutlinedButton = wishlistMode
+                isOutlinedButton = false
             )
         }
 
@@ -171,7 +169,7 @@ fun ProductItemCard(
                 showSnackbarMessage = showSnackbarMessage,
                 token = token,
                 modifier = sharedModifier.weight(7f),
-                isOutlinedButton = !wishlistMode
+                isOutlinedButton = true
             )
         }
 
@@ -180,15 +178,9 @@ fun ProductItemCard(
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
         ) {
-            if (!wishlistMode) {
-                renderAddToCartButton()
-                Spacer(modifier = Modifier.height(8.dp))
-                renderWishlistButton()
-            } else {
-                renderWishlistButton()
-                Spacer(modifier = Modifier.height(8.dp))
-                renderAddToCartButton()
-            }
+            renderAddToCartButton()
+            Spacer(modifier = Modifier.height(8.dp))
+            renderWishlistButton()
         }
     }
 }

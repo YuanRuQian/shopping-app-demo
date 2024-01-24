@@ -30,6 +30,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+// TODO: add cancel order
+// TODO: filter order by status
+
 @Composable
 fun HistoryScreen(
     orderHistory: List<Order>?,

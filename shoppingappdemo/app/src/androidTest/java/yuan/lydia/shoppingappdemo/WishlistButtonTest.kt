@@ -1,8 +1,5 @@
 package yuan.lydia.shoppingappdemo
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -10,7 +7,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import yuan.lydia.shoppingappdemo.ui.common.WishlistButton
-import java.lang.reflect.Modifier
 
 @RunWith(AndroidJUnit4::class)
 class WishlistButtonTest {

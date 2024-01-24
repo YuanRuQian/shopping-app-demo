@@ -117,7 +117,7 @@ fun UserCart(
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
             items(userCartData.size) { index ->
-                CartItem(
+                CartItemCard(
                     cartItem = userCartData[index],
                     updateQuantity = updateQuantity,
                     showSnackbarMessage = showSnackbarMessage,

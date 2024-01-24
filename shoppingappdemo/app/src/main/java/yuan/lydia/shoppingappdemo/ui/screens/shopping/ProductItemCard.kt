@@ -179,7 +179,8 @@ fun ProductItemCard(
                 selectedQuantity = selectedQuantity,
                 username = username,
                 modifier = sharedModifier.weight(5f),
-                isOutlinedButton = false
+                isOutlinedButton = false,
+                enabled = selectedQuantity > 0
             )
         }
 

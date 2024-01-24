@@ -27,6 +27,7 @@ fun AddToCartButton(
     username: String,
     modifier: Modifier,
     isOutlinedButton: Boolean = false,
+    enabled: Boolean = true
 ) {
 
     fun onClick() {
@@ -41,7 +42,7 @@ fun AddToCartButton(
 
     if (isOutlinedButton) {
         OutlinedButton(
-            enabled = selectedQuantity > 0,
+            enabled = enabled,
             onClick = {
                 onClick()
             },
@@ -51,7 +52,7 @@ fun AddToCartButton(
         }
     } else {
         Button(
-            enabled = selectedQuantity > 0,
+            enabled = enabled,
             onClick = {
                 onClick()
             },

@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material3.Button
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -130,7 +131,7 @@ fun UserCart(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomEnd)
-                .background(Color.White),
+                .background(Color(0xfffdf5e8)),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -147,11 +148,12 @@ fun UserCart(
                         }
                     }",
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 8.dp)
                 )
             }
 
-            Button(
+            ElevatedButton(
                 onClick = {
                     checkout(
                         token, username, userCartData, onCheckoutSuccess

@@ -109,7 +109,7 @@ fun ProductItemCard(
                                 readOnly = true,
                                 value = if (selectedQuantity > 0) selectedQuantity.toString() else "",
                                 onValueChange = {},
-                                prefix = { if (selectedQuantity > 0) Text("Quantity:") else Text("Select Quantity") },
+                                prefix = { if (selectedQuantity > 0) Text("Quantity:") else Text("To Add to Cart, Pick a Quantity") },
                                 trailingIcon = {
                                     ExposedDropdownMenuDefaults.TrailingIcon(
                                         expanded = expanded
@@ -121,7 +121,7 @@ fun ProductItemCard(
                                         top = 8.dp,
                                         end = 8.dp
                                     )
-                                    .width(181.dp)
+                                    .width(if(selectedQuantity > 0)158.dp else 300.dp)
                                     .menuAnchor()
                             )
 

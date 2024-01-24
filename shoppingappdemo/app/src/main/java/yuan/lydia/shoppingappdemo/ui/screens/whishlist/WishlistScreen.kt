@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.common.Product
 import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
-import yuan.lydia.shoppingappdemo.ui.common.ProductItem
+import yuan.lydia.shoppingappdemo.ui.common.ProductItemCard
 
 @Composable
 fun WishlistScreen(
@@ -78,13 +78,14 @@ fun Wishlist(
 
     LazyColumn {
         items(wishlist.size) { index ->
-            ProductItem(
+            ProductItemCard(
                 product = wishlist[index],
                 increaseQuantity = addToCart,
                 showSnackbarMessage = showSnackbarMessage,
                 addToWishList = { _, _, _, _ -> },
                 removeFromWishList = removeFromWishList,
                 ifProductIsInWishlist = { true },
+                wishlistMode = true
             )
         }
     }

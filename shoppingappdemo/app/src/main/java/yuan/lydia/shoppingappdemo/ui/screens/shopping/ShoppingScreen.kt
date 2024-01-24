@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import yuan.lydia.shoppingappdemo.data.utils.UserInfoManager
 import yuan.lydia.shoppingappdemo.network.common.Product
 import yuan.lydia.shoppingappdemo.ui.common.PlaceholderScreen
-import yuan.lydia.shoppingappdemo.ui.common.ProductItem
+import yuan.lydia.shoppingappdemo.ui.common.ProductItemCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -193,13 +193,14 @@ fun ProductsList(
 
     LazyColumn {
         items(products.size) { index ->
-            ProductItem(
+            ProductItemCard(
                 product = products[index],
                 increaseQuantity = increaseQuantity,
                 showSnackbarMessage = showSnackbarMessage,
                 addToWishList = addToWishList,
                 removeFromWishList = removeFromWishList,
-                ifProductIsInWishlist = ifProductIsInWishlist
+                ifProductIsInWishlist = ifProductIsInWishlist,
+                wishlistMode = false
             )
         }
     }

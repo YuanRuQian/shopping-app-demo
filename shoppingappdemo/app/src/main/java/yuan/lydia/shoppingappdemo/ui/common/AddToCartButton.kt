@@ -26,7 +26,7 @@ fun AddToCartButton(
     selectedQuantity: Int,
     username: String,
     modifier: Modifier,
-    isOutlinedButton: Boolean = false
+    isOutlinedButton: Boolean = false,
 ) {
 
     fun onClick() {
@@ -36,7 +36,7 @@ fun AddToCartButton(
             selectedQuantity
         )
         showSnackbarMessage("Added $selectedQuantity ${product.name} to cart!")
-        setSelectedQuantity(1)
+        setSelectedQuantity(0)
     }
 
     if (isOutlinedButton) {

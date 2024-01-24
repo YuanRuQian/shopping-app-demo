@@ -9,11 +9,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -46,7 +51,7 @@ fun ProductItemCard(
     ifProductIsInWishlist: (Long) -> Boolean,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val (selectedQuantity, setSelectedQuantity) = remember { mutableIntStateOf(1) }
+    val (selectedQuantity, setSelectedQuantity) = remember { mutableIntStateOf(0) }
 
     val context = LocalContext.current
     val token = UserInfoManager.getInstance(context).getToken() ?: return
@@ -63,18 +68,19 @@ fun ProductItemCard(
         ) {
             Text(
                 text = product.name,
+                modifier = Modifier.padding(start = 4.dp),
                 fontWeight = FontWeight.Bold,
                 fontSize = MaterialTheme.typography.bodyLarge.fontSize
             )
             Text(
                 text = product.description,
-                modifier = Modifier.padding(top = 4.dp),
+                modifier = Modifier.padding(top = 4.dp, start = 4.dp),
                 color = MaterialTheme.colorScheme.secondary,
             )
 
             Text(
-                text = "Price: $${product.retailPrice}",
-                modifier = Modifier.padding(top = 4.dp)
+                text = "Retail Price: $${product.retailPrice}",
+                modifier = Modifier.padding(top = 4.dp, start = 4.dp),
             )
 
             Row(
@@ -88,7 +94,9 @@ fun ProductItemCard(
             ) {
                 ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onExpandedChange = { expanded = it }) {
+                    onExpandedChange = {
+                        expanded = it
+                    }) {
                     CompositionLocalProvider(LocalTextInputService provides null) {
                         Row(
                             modifier = Modifier
@@ -99,9 +107,9 @@ fun ProductItemCard(
 
                             TextField(
                                 readOnly = true,
-                                value = selectedQuantity.toString(),
+                                value = if (selectedQuantity > 0) selectedQuantity.toString() else "",
                                 onValueChange = {},
-                                prefix = { Text("Quantity:") },
+                                prefix = { if (selectedQuantity > 0) Text("Quantity:") else Text("Select Quantity") },
                                 trailingIcon = {
                                     ExposedDropdownMenuDefaults.TrailingIcon(
                                         expanded = expanded
@@ -111,12 +119,29 @@ fun ProductItemCard(
                                 modifier = Modifier
                                     .padding(
                                         top = 8.dp,
-                                        end = 8.dp,
-                                        bottom = 8.dp
-                                    ) // Adjust padding as needed
+                                        end = 8.dp
+                                    )
+                                    .width(181.dp)
                                     .menuAnchor()
                             )
 
+
+
+                            if (selectedQuantity > 0) {
+                                IconButton(onClick = {
+                                    setSelectedQuantity(0)
+                                    expanded = false
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Restore,
+                                        contentDescription = null
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Total Price: $${product.retailPrice * selectedQuantity}",
+                                )
+                            }
 
                             ExposedDropdownMenu(
                                 expanded = expanded,
@@ -140,7 +165,7 @@ fun ProductItemCard(
         }
 
         val sharedModifier = Modifier
-            .padding(8.dp)
+            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
             .height(IntrinsicSize.Min)
 
 

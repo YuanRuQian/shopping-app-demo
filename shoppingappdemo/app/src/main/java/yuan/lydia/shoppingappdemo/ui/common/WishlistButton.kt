@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,7 +27,7 @@ fun WishlistButton(
     productId: Long,
     showSnackbarMessage: (String) -> Unit,
     token: String,
-    modifier: Modifier,
+    modifier: Modifier? = null,
     isOutlinedButton: Boolean = false
 ) {
 
@@ -59,14 +60,14 @@ fun WishlistButton(
     if (isOutlinedButton) {
         OutlinedButton(
             onClick = { onClick() },
-            modifier = modifier
+            modifier = modifier?: Modifier,
         ) {
             WishlistButtonContent(isInWishlist)
         }
     } else {
         Button(
             onClick = { onClick() },
-            modifier = modifier
+            modifier = modifier?: Modifier,
         ) {
             WishlistButtonContent(isInWishlist)
         }
@@ -76,6 +77,8 @@ fun WishlistButton(
 @Composable
 fun WishlistButtonContent(isInWishlist: Boolean) {
     Column(
+        modifier = Modifier
+            .testTag("wishlistButtonContent"),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {

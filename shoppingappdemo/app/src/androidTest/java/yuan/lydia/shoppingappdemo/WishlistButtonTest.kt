@@ -1,5 +1,8 @@
 package yuan.lydia.shoppingappdemo
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -7,6 +10,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import yuan.lydia.shoppingappdemo.ui.common.WishlistButton
+import java.lang.reflect.Modifier
 
 @RunWith(AndroidJUnit4::class)
 class WishlistButtonTest {
@@ -33,10 +37,9 @@ class WishlistButtonTest {
 
         val iconTag = "wishlistButtonIcon"
 
-        // composeTestRule.onRoot(useUnmergedTree = true).printToLog("TAG")
+        composeTestRule.onNodeWithTag(iconTag, true).printToLog("TAG")
 
-        composeTestRule.onNodeWithTag("wishlistButton", true)
-            .onChildren().onFirst().assert(hasTestTag(iconTag))
+        composeTestRule.onNodeWithTag(iconTag, true).assertExists()
 
         // TODO: how to check if the icon is the correct one? no solution for Jetpack Compose Icon yet
 

@@ -41,6 +41,7 @@ fun AddToCartButton(
 
     if (isOutlinedButton) {
         OutlinedButton(
+            enabled = selectedQuantity > 0,
             onClick = {
                 onClick()
             },
@@ -50,6 +51,7 @@ fun AddToCartButton(
         }
     } else {
         Button(
+            enabled = selectedQuantity > 0,
             onClick = {
                 onClick()
             },

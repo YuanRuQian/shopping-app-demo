@@ -55,6 +55,7 @@ fun AppCanvas(
     val userCart by cartViewModel.userCartLiveData.observeAsState()
     val orderHistory by historyViewModel.orderHistory.observeAsState()
     val currentOrderDetails by historyViewModel.currentOrderDetails.observeAsState()
+    val( currentRoute, setCurrentRoute) = remember { mutableStateOf(AppRoute.Shopping.route) }
 
     LaunchedEffect(key1 = true) {
         setIsUserLoggedIn(UserInfoManager.getInstance(context).isTokenExist())
@@ -83,7 +84,7 @@ fun AppCanvas(
             )
         },
         bottomBar = {
-            BottomNavigationBar(navController, isUserLoggedIn)
+            BottomNavigationBar(navController, isUserLoggedIn, currentRoute, setCurrentRoute)
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -107,6 +108,7 @@ fun AppCanvas(
                             setIsUserLoggedIn(true)
                             navController.navigate(AppRoute.Shopping.route) {
                                 popUpTo(AppRoute.Login.route) { inclusive = true }
+                                setCurrentRoute(AppRoute.Shopping.route)
                             }
                         },
                         navigateToRegister = {
@@ -122,6 +124,7 @@ fun AppCanvas(
                             setIsUserLoggedIn(true)
                             navController.navigate(AppRoute.Shopping.route) {
                                 popUpTo(AppRoute.Register.route) { inclusive = true }
+                                setCurrentRoute(AppRoute.Shopping.route)
                             }
                         },
                         navigateToLogin = {
@@ -165,6 +168,7 @@ fun AppCanvas(
                             )
                             navController.navigate(AppRoute.Shopping.route) {
                                 popUpTo(AppRoute.Cart.route) { inclusive = true }
+                                setCurrentRoute(AppRoute.Shopping.route)
                             }
                             snackbarViewModel.showSnackbar("Order submitted successfully, $username!")
                         }

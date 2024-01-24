@@ -11,32 +11,31 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 fun navigationWithDestinationPreCheck(
+    setCurrentRoute: (String) -> Unit,
     navController: NavController,
     destination: String,
     navBackStackEntry: NavBackStackEntry?
 ) {
     if (navBackStackEntry?.destination?.route != destination) {
+        setCurrentRoute(destination)
         navController.navigate(destination)
     }
 }
 
 @Composable
-fun BottomNavigationBar(navController: NavController, isUserLoggedIn: Boolean) {
+fun BottomNavigationBar(navController: NavController, isUserLoggedIn: Boolean, currentRoute: String, setCurrentRoute: (String) -> Unit) {
     if (!isUserLoggedIn) {
         return
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-
-    var selectedItem by remember { mutableIntStateOf(0) }
 
     val icons = listOf(
         Icons.Default.Search,
@@ -56,14 +55,14 @@ fun BottomNavigationBar(navController: NavController, isUserLoggedIn: Boolean) {
 
 
     NavigationBar {
-        zippedList.forEachIndexed { index, (icon, route) ->
+        zippedList.forEachIndexed { _, (icon, route) ->
             NavigationBarItem(
                 icon = { Icon(icon, contentDescription = route) },
                 label = { Text(route) },
-                selected = selectedItem == index,
+                selected = currentRoute == route,
                 onClick = {
-                    selectedItem = index
                     navigationWithDestinationPreCheck(
+                        setCurrentRoute,
                         navController,
                         route,
                         navBackStackEntry
